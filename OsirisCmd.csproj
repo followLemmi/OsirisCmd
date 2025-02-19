@@ -16,4 +16,14 @@
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.1.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="OsirisCmdPluginInterface">
+      <HintPath>..\OsirisCmdPluginInterface\OsirisCmdPluginInterface\bin\Debug\net8.0\OsirisCmdPluginInterface.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="CreatePluginsFolder" AfterTargets="AfterBuild">
+    <MakeDir Directories="$(OutputPath)plugins" />
+  </Target>
 </Project>
