@@ -1,0 +1,35 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:OsirisCmd.ViewModels;assembly=OsirisCmd"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" Width="400" Height="600"
+        x:Class="OsirisCmd.Views.PluginsInfoWindow"
+        Title="PluginsInfoWindow"
+        x:DataType="viewModels:PluginsInfoViewModel">
+    
+    <Window.DataContext>
+        <viewModels:PluginsInfoViewModel />
+    </Window.DataContext>
+    
+    <ListBox ItemsSource="{Binding Plugins}">
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <StackPanel>
+                    <TextBlock FontSize="16" Text="{Binding Name}" />
+                    <TextBlock FontSize="12" Text="{Binding Version}" />
+                    <TextBlock FontSize="12" Text="{Binding Description}" />
+                </StackPanel>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
+    
+    <!-- <DataGrid ItemsSource="{Binding Plugins}" AutoGenerateColumns="True" Width="380" Height="500"> -->
+    <!--     <DataGrid.Columns> -->
+    <!--         <DataGridTextColumn Header="Name" Binding="{Binding Name}"/> -->
+    <!--         <DataGridTextColumn Header="Version" Binding="{Binding Version}"/> -->
+    <!--         <DataGridTextColumn Header="Description" Binding="{Binding Description}"/> -->
+    <!--     </DataGrid.Columns> -->
+    <!-- -->
+    <!-- </DataGrid> -->
+</Window>
