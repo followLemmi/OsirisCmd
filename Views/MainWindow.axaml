@@ -5,7 +5,8 @@
         xmlns:views="clr-namespace:OsirisCmd.Views;assembly=OsirisCmd"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OsirisCmd.Views.MainWindow"
-        Title="OsirisCmd">
+        Title="OsirisCmd"
+        x:Name="OsirisCmdMainWindow">
 
     <DockPanel>
         <views:MainMenuControl DockPanel.Dock="Top"/>

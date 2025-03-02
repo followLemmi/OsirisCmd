@@ -12,7 +12,7 @@
             <MenuItem Header="_Exit" />
         </MenuItem>
         <MenuItem Header="Plugins">
-            <MenuItem Header="Show loaded plugins" Click="PluginsInfoClickHandler"/>
+            <MenuItem Header="Show plugins" Click="PluginsInfoClickHandler"/>
         </MenuItem>
     </Menu>
     

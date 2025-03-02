@@ -74,7 +74,7 @@ public class PluginManager
                         IOsirisCommanderPlugin? pluginInstance = Activator.CreateInstance(type) as IOsirisCommanderPlugin;
                         if (pluginInstance != null) 
                         {
-                            _plugins.Add(new Plugin(pluginInstance.Name, pluginInstance.Description, pluginInstance.Version));
+                            _plugins.Add(new Plugin(pluginInstance.Name, pluginInstance.Description, pluginInstance.Version, true));
                         }
                     }
                 }
