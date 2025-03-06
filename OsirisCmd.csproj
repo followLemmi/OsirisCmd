@@ -24,6 +24,12 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Views\PluginsSettingsView.axaml.cs">
+      <DependentUpon>PluginsSettingsView.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
   <Target Name="CreatePluginsFolder" AfterTargets="AfterBuild">
     <MakeDir Directories="$(OutputPath)plugins" />
   </Target>

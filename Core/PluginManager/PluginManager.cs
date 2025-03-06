@@ -4,18 +4,20 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
 using Avalonia.Controls;
+using OsirisCmd.Core.SettingsStorage;
 using OsirisCmdPluginInterface.core;
 
 namespace OsirisCmd.core.PluginManager;
 
 public class PluginManager
 {
-
-    private readonly string _pluginPath = "plugins/";
+    private readonly string _pluginPath = Path.Combine(AppContext.BaseDirectory, "plugins/");
     private readonly ObservableCollection<Plugin> _plugins = [];
 
-    private static readonly object _lock = new object();
+    private static readonly object Lock = new object();
     private static PluginManager? _instance;
+    
+    private SettingsProvider _settingsProvider = SettingsProvider.Instance;
 
     public static PluginManager Instance
     {
@@ -30,7 +32,7 @@ public class PluginManager
         }
     }
 
-    public PluginManager(Window mainWindow)
+    private PluginManager(Window mainWindow)
     {
         _instance = this;
         LoadPlugins();
@@ -38,7 +40,7 @@ public class PluginManager
     
     public static void Initialize(Window mainWindow)
     {
-        lock (_lock)
+        lock (Lock)
         {
             if (_instance != null)
             {
@@ -56,7 +58,7 @@ public class PluginManager
 
     private String[] CollectPlugins()
     {
-        return Directory.GetFiles(Path.GetFullPath(_pluginPath), "*.dll");
+        return Directory.GetFiles(_pluginPath, "*.dll");
     }
 
     private void LoadPlugins()
@@ -72,9 +74,16 @@ public class PluginManager
                     if (typeof(IOsirisCommanderPlugin).IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract)
                     {
                         IOsirisCommanderPlugin? pluginInstance = Activator.CreateInstance(type) as IOsirisCommanderPlugin;
-                        if (pluginInstance != null) 
+                        if (pluginInstance != null)
                         {
-                            _plugins.Add(new Plugin(pluginInstance.Name, pluginInstance.Description, pluginInstance.Version, true));
+                            var pluginObject = new Plugin(pluginInstance.Name, pluginInstance.Description,
+                                pluginInstance.Version, true);
+                            _plugins.Add(pluginObject);
+                            _settingsProvider.ApplicationSettings.PluginSettings.Add(new PluginSettings()
+                            {
+                                Name = pluginObject.Name,
+                                Enabled = true
+                            });
                         }
                     }
                 }

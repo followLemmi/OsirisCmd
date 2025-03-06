@@ -6,13 +6,8 @@
              x:Class="OsirisCmd.Views.MainMenuControl">
     
     <Menu x:Name="MainMenu" DockPanel.Dock="Top">
-        <MenuItem Header="_File">
-            <MenuItem Header="_Open..." />
-            <Separator />
-            <MenuItem Header="_Exit" />
-        </MenuItem>
-        <MenuItem Header="Plugins">
-            <MenuItem Header="Show plugins" Click="PluginsInfoClickHandler"/>
+        <MenuItem Header="File">
+            <MenuItem Header="Settings" Click="SettingsItem_OnClick"/>
         </MenuItem>
     </Menu>
     

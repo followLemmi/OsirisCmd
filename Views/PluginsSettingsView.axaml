@@ -1,19 +1,16 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:OsirisCmd.ViewModels;assembly=OsirisCmd"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" Width="400" Height="600"
-        x:Class="OsirisCmd.Views.PluginsInfoWindow"
-        Title="PluginsInfoWindow"
-        x:DataType="viewModels:PluginsInfoViewModel"
-        CanResize="False"
-        WindowStartupLocation="CenterOwner"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" Width="300" Height="500"
+        x:Class="OsirisCmd.Views.PluginsSettingsView"
+        x:DataType="viewModels:PluginsSettingsViewModel"
         >
     
-    <Window.DataContext>
-        <viewModels:PluginsInfoViewModel />
-    </Window.DataContext>
+    <UserControl.DataContext>
+        <viewModels:PluginsSettingsViewModel />
+    </UserControl.DataContext>
     
     <ListBox ItemsSource="{Binding Plugins}">
         <ListBox.ItemTemplate>
@@ -30,4 +27,4 @@
             </DataTemplate>
         </ListBox.ItemTemplate>
     </ListBox>
-</Window>
+</UserControl>
