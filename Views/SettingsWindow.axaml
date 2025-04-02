@@ -8,17 +8,23 @@
         Title="SettingsWindow"
         Width="400" Height="600"
         x:DataType="viewModels:SettingsWindowViewModel">
-        
-        <Window.DataContext>
-                <viewModels:SettingsWindowViewModel/>
-        </Window.DataContext>
-        
-        <TabControl TabStripPlacement="Left" ItemsSource="{Binding Settings}">
-                <TabControl.ItemTemplate>
-                        <DataTemplate>
-                                <ContentControl Content="{Binding Content}"></ContentControl>
-                        </DataTemplate>
-                </TabControl.ItemTemplate>
-        </TabControl>
-        
+
+    <Window.DataContext>
+        <viewModels:SettingsWindowViewModel />
+    </Window.DataContext>
+
+    <TabControl TabStripPlacement="Left" ItemsSource="{Binding Tabs}">
+        <!-- <TabControl.ItemTemplate> -->
+        <!--     <DataTemplate> -->
+        <!--         <TextBlock Text="{Binding Name}" /> -->
+        <!--     </DataTemplate> -->
+        <!-- </TabControl.ItemTemplate> -->
+        <!-- <TabControl.ContentTemplate> -->
+        <!--     <DataTemplate> -->
+        <!--         <ContentControl></ContentControl> -->
+        <!--         ~1~ <ContentPresenter Content="{Binding Settings}" /> @1@ -->
+        <!--     </DataTemplate> -->
+        <!-- </TabControl.ContentTemplate> -->
+    </TabControl>
+
 </Window>
