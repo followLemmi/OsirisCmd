@@ -1,25 +1,20 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using OsirisCmd.core.PluginManager;
+﻿using System.ComponentModel;
 
 namespace OsirisCmd.Core.SettingsStorage;
 
-public class PluginSettings : INotifyPropertyChanged
+public sealed class PluginSettings : INotifyPropertyChanged
 {
-    private string _name;
+    private string? _name;
     private bool _enabled;
 
-    public string Name
+    public string? Name
     {
         get => _name;
         set
         {
-            if (_name != value)
-            {
-                _name = value;
-                OnPropertyChanged(nameof(Name));
-            }
+            if (_name == value) return;
+            _name = value;
+            OnPropertyChanged(nameof(Name));
         }
     }
 
@@ -37,7 +32,7 @@ public class PluginSettings : INotifyPropertyChanged
     }
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public virtual void OnPropertyChanged(string propertyName)
+    public void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

@@ -19,7 +19,7 @@ public partial class App : Application
         {
             var mainWindow = new Views.MainWindow();
             SettingsProvider.Initialize();
-            PluginManager.Initialize(mainWindow);
+            PluginManager.Initialize();
             desktop.MainWindow = mainWindow;
         }
 

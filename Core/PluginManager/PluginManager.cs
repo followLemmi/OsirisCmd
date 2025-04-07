@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Avalonia.Controls;
 using OsirisCmd.Core.SettingsStorage;
@@ -32,13 +33,14 @@ public class PluginManager
         }
     }
 
-    private PluginManager(Window mainWindow)
+    private PluginManager()
     {
         _instance = this;
         LoadPlugins();
+        
     }
     
-    public static void Initialize(Window mainWindow)
+    public static void Initialize()
     {
         lock (Lock)
         {
@@ -47,7 +49,7 @@ public class PluginManager
                 throw new InvalidOperationException("PluginManager has already been initialized.");
             }
 
-            _instance = new PluginManager(mainWindow);
+            _instance = new PluginManager();
         }
     }
     
@@ -63,29 +65,34 @@ public class PluginManager
 
     private void LoadPlugins()
     {
-        String[] plugins = CollectPlugins();
-        foreach (string plugin in plugins)
+        var plugins = CollectPlugins();
+        foreach (var plugin in plugins)
         {
             try
             {
                 var assembly = Assembly.LoadFile(plugin);
-                foreach (Type type in assembly.GetTypes())
+                foreach (var type in assembly.GetTypes())
                 {
-                    if (typeof(IOsirisCommanderPlugin).IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract)
+                    if (!typeof(IOsirisCommanderPlugin).IsAssignableFrom(type) || type.IsInterface ||
+                        type.IsAbstract) continue;
+                    if (Activator.CreateInstance(type) is not IOsirisCommanderPlugin pluginInstance) continue;
+                    var pluginSettings = _settingsProvider.ApplicationSettings.PluginSettings
+                        .FirstOrDefault(p => p.Name == pluginInstance.Name);
+                    var pluginObject = new Plugin(pluginInstance.Name, pluginInstance.Description, pluginInstance.Author,
+                        pluginInstance.Version, pluginInstance.SettingsTabContent, pluginSettings!.Enabled);
+                    if (pluginObject.IsEnabled)
                     {
-                        IOsirisCommanderPlugin? pluginInstance = Activator.CreateInstance(type) as IOsirisCommanderPlugin;
-                        if (pluginInstance != null)
+                        _plugins.Add(pluginObject);
+                        if (pluginObject.SettingsTabContent != null)
                         {
-                            var pluginObject = new Plugin(pluginInstance.Name, pluginInstance.Description,
-                                pluginInstance.Version, true);
-                            _plugins.Add(pluginObject);
-                            _settingsProvider.ApplicationSettings.PluginSettings.Add(new PluginSettings()
-                            {
-                                Name = pluginObject.Name,
-                                Enabled = true
-                            });
+                            _settingsProvider.AddPluginSettings(pluginObject.Name, pluginObject.SettingsTabContent);
                         }
                     }
+                    _settingsProvider.ApplicationSettings.PluginSettings.Add(new PluginSettings()
+                    {
+                        Name = pluginObject.Name,
+                        Enabled = true
+                    });
                 }
             }
             catch (ReflectionTypeLoadException ex)

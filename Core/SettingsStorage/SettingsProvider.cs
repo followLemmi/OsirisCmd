@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
+using Avalonia.Controls;
 using OsirisCmd.Core.SettingsStorage.Events;
 
 namespace OsirisCmd.Core.SettingsStorage;
 
 public class SettingsProvider
 {
-    private readonly string _settingsFileName = "settings.json";
-    
+    private const string SettingsFileName = "settings.json";
+
     private static SettingsProvider? _instance;
 
+    public ObservableCollection<ISettingsProvider> PluginSettings { get; }
     public ApplicationSettings ApplicationSettings { get; }
 
     public static SettingsProvider Instance
@@ -47,23 +50,28 @@ public class SettingsProvider
         }
         _instance = new SettingsProvider();
     }
-
-    private ApplicationSettings LoadSettings() 
+    
+    public void AddPluginSettings(string settingName, UserControl? settingsTabContent)
     {
-        if (!File.Exists(_settingsFileName))
+        PluginSettings.Add(new PluginsListSettingProvider(settingName, settingsTabContent));
+    }
+
+    private static ApplicationSettings LoadSettings() 
+    {
+        if (!File.Exists(SettingsFileName))
         {
             var settings = new ApplicationSettings();
-            File.WriteAllText(_settingsFileName, JsonSerializer.Serialize(settings));
+            File.WriteAllText(SettingsFileName, JsonSerializer.Serialize(settings));
             return settings;
         }
 
-        var json = File.ReadAllText(_settingsFileName);
+        var json = File.ReadAllText(SettingsFileName);
         var applicationSettings = JsonSerializer.Deserialize<ApplicationSettings>(json);
         return applicationSettings ?? new ApplicationSettings();
     }
 
     private void SaveSettings()
     {
-        File.WriteAllText(_settingsFileName, JsonSerializer.Serialize(ApplicationSettings));
+        File.WriteAllText(SettingsFileName, JsonSerializer.Serialize(ApplicationSettings));
     }
 }

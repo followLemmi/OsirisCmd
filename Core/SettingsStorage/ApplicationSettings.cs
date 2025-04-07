@@ -11,7 +11,7 @@ public class ApplicationSettings
     public ApplicationSettings()
     {
         PluginSettings = [];
-        PluginSettings.ListChanged += (sender, args) => SettingChangedEvent.Invoke();
+        PluginSettings.ListChanged += (_, _) => SettingChangedEvent.Invoke();
     }
     
     
