@@ -14,7 +14,7 @@ public class SettingsProvider
 
     private static SettingsProvider? _instance;
 
-    public ObservableCollection<ISettingsProvider> PluginSettings { get; }
+    public ObservableCollection<ISettingsProvider> PluginSettings { get; } = [];
     public ApplicationSettings ApplicationSettings { get; }
 
     public static SettingsProvider Instance

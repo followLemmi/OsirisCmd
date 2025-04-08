@@ -18,7 +18,7 @@ public class PluginManager
     private static readonly object Lock = new object();
     private static PluginManager? _instance;
     
-    private SettingsProvider _settingsProvider = SettingsProvider.Instance;
+    private readonly SettingsProvider _settingsProvider = SettingsProvider.Instance;
 
     public static PluginManager Instance
     {
@@ -58,19 +58,21 @@ public class PluginManager
         return _plugins;
     }
 
-    private String[] CollectPlugins()
+    private string[] CollectPlugins()
     {
-        return Directory.GetFiles(_pluginPath, "*.dll");
+        return Directory.GetDirectories(_pluginPath);
     }
 
     private void LoadPlugins()
     {
-        var plugins = CollectPlugins();
-        foreach (var plugin in plugins)
+        var pluginsFolders = CollectPlugins();
+        foreach (var pluginFolder in pluginsFolders)
         {
+            var pluginManifest = PluginManifest.ParsePluginManifest(pluginFolder + "/manifest.plug");
             try
             {
-                var assembly = Assembly.LoadFile(plugin);
+                var pluginDllPath = Path.Combine(pluginFolder, pluginManifest.MainDllName);
+                var assembly = Assembly.LoadFile(pluginDllPath);
                 foreach (var type in assembly.GetTypes())
                 {
                     if (!typeof(IOsirisCommanderPlugin).IsAssignableFrom(type) || type.IsInterface ||
@@ -79,7 +81,7 @@ public class PluginManager
                     var pluginSettings = _settingsProvider.ApplicationSettings.PluginSettings
                         .FirstOrDefault(p => p.Name == pluginInstance.Name);
                     var pluginObject = new Plugin(pluginInstance.Name, pluginInstance.Description, pluginInstance.Author,
-                        pluginInstance.Version, pluginInstance.SettingsTabContent, pluginSettings!.Enabled);
+                        pluginInstance.Version, pluginInstance.SettingsTabContent, pluginSettings == null || pluginSettings.Enabled);
                     if (pluginObject.IsEnabled)
                     {
                         _plugins.Add(pluginObject);
@@ -97,7 +99,7 @@ public class PluginManager
             }
             catch (ReflectionTypeLoadException ex)
             {
-                Console.WriteLine($"Failed to load types from assembly {plugin}: {ex.Message}");
+                Console.WriteLine($"Failed to load types from assembly {pluginManifest.MainDllName}: {ex.Message}");
                 foreach (var loaderException in ex.LoaderExceptions)
                 {
                     Console.WriteLine(loaderException.Message);
@@ -105,7 +107,7 @@ public class PluginManager
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to load assembly {plugin}: {ex.Message}");
+                Console.WriteLine($"Failed to load assembly {pluginManifest.MainDllName}: {ex.Message}");
             }
         }
     }

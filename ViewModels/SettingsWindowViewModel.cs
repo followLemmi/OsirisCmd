@@ -9,9 +9,16 @@ public class SettingsWindowViewModel
     public ObservableCollection<ISettingsProvider> Settings { get; }
     public ObservableCollection<TabItem> Tabs { get; }
 
+    private readonly SettingsProvider _settingsProvider = SettingsProvider.Instance;
+
     public SettingsWindowViewModel()
     {
-        Tabs = new ObservableCollection<TabItem>();
+        Settings = [];
+        foreach (var pluginSetting in _settingsProvider.PluginSettings)
+        {
+            Settings?.Add(pluginSetting);
+        }
+        Tabs = [];
         foreach (var settingTab in Settings)
         {
             Tabs.Add(new TabItem()
