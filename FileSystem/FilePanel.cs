@@ -1,5 +1,6 @@
 ﻿namespace FileSystem;
 
-public class Class1
+public class FilePanel
 {
+    
 }

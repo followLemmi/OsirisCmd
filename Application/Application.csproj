@@ -30,6 +30,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PluginsManager\PluginsManager.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\SettingsManager\SettingsManager.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Components\PluginsSettingsComponent.axaml.cs">
       <DependentUpon>PluginsSettingsView.axaml</DependentUpon>
       <SubType>Code</SubType>

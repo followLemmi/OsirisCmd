@@ -19,4 +19,9 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PluginsAPI\PluginsAPI.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\SettingsManager\SettingsManager.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
 </Project>
