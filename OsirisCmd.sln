@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSystem", "FileSystem\Fi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{F0601FAB-8F77-FC9C-D03D-CC4F67CFBD77}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBStorageAdapter", "DBStorageAdapter\DBStorageAdapter.csproj", "{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{53A3763C-F4F4-4F87-BF98-E62458FE54AA}.Release|x64.Build.0 = Release|Any CPU
 		{53A3763C-F4F4-4F87-BF98-E62458FE54AA}.Release|x86.ActiveCfg = Release|Any CPU
 		{53A3763C-F4F4-4F87-BF98-E62458FE54AA}.Release|x86.Build.0 = Release|Any CPU
+		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Debug|x64.Build.0 = Debug|Any CPU
+		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Debug|x86.Build.0 = Debug|Any CPU
+		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Release|x64.ActiveCfg = Release|Any CPU
+		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Release|x64.Build.0 = Release|Any CPU
+		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Release|x86.ActiveCfg = Release|Any CPU
+		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

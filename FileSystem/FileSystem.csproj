@@ -6,4 +6,18 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+        <Reference Include="DBStorageAdapter">
+            <HintPath>..\DBStorageAdapter\bin\Debug\net9.0\DBStorageAdapter.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="..\DBStorageAdapter\DBStorageAdapter.csproj" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.0-preview.3.25171.6" />
+    </ItemGroup>
+    
 </Project>
