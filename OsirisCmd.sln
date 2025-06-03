@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBStorageAdapter", "DBStorageAdapter\DBStorageAdapter.csproj", "{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchingEngine", "SearchingEngine\SearchingEngine.csproj", "{290CD725-9FB3-4782-B23E-86A227683FD0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,18 @@ Global
 		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Release|x64.Build.0 = Release|Any CPU
 		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Release|x86.ActiveCfg = Release|Any CPU
 		{1EDEE4CE-F2F9-48FF-AE38-C3E010BD7F6B}.Release|x86.Build.0 = Release|Any CPU
+		{290CD725-9FB3-4782-B23E-86A227683FD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{290CD725-9FB3-4782-B23E-86A227683FD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{290CD725-9FB3-4782-B23E-86A227683FD0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{290CD725-9FB3-4782-B23E-86A227683FD0}.Debug|x64.Build.0 = Debug|Any CPU
+		{290CD725-9FB3-4782-B23E-86A227683FD0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{290CD725-9FB3-4782-B23E-86A227683FD0}.Debug|x86.Build.0 = Debug|Any CPU
+		{290CD725-9FB3-4782-B23E-86A227683FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{290CD725-9FB3-4782-B23E-86A227683FD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{290CD725-9FB3-4782-B23E-86A227683FD0}.Release|x64.ActiveCfg = Release|Any CPU
+		{290CD725-9FB3-4782-B23E-86A227683FD0}.Release|x64.Build.0 = Release|Any CPU
+		{290CD725-9FB3-4782-B23E-86A227683FD0}.Release|x86.ActiveCfg = Release|Any CPU
+		{290CD725-9FB3-4782-B23E-86A227683FD0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
