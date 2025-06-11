@@ -96,6 +96,19 @@ public class FileSearcher
         }
     }
 
+    public List<SearchResult> SearchByFileContent(string content, int maxResults = 100)
+    {
+        try
+        {
+            var query = _fileContentParser.Parse(content);
+            return ExecuteSearch(query, maxResults);
+        } catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return [];
+        }
+    }
+
     private List<SearchResult> ExecuteSearch(Query query, int maxResults)
     {
         var results = new List<SearchResult>();
@@ -125,7 +138,7 @@ public class FileSearcher
     
     private void IndexFiles()
     {
-        var rootPath = "c://";
+        var rootPath = "c://workspace//jvl";
         Console.WriteLine($"Strat indexing in {rootPath}...");
         
         try
@@ -205,33 +218,23 @@ public class FileSearcher
     {
         var fileInfo = new FileInfo(file);
 
-        // if (_searchingEngine.IsFileIndexed(file, fileInfo.LastWriteTime))
-        // {
-        //     return;
-        // }
-        
-        // if (Path.GetFullPath(file).Contains("Osiris") || file.Contains("/.") || file.Contains("\\."))
-        // {
-        //     return;
-        // }
-        
-        if (fileInfo.Length > 100 * 1024 * 1024)
+        if (_searchingEngine.IsFileIndexed(file, fileInfo.LastWriteTime))
         {
             return;
         }
         
         Console.WriteLine($"Indexing {file}");
         
-        string content = GetFileContent(file);
+        var content = GetFileContent(file);
         
         _searchingEngine.IndexFile(file, content);
     }
 
-    private bool HasDirectoryAccess(string directoryPath)
+    private static bool HasDirectoryAccess(string directoryPath)
     {
         try
         {
-            Directory.EnumerateFileSystemEntries(directoryPath).Take(1).ToList();
+            var canTakeDir = Directory.EnumerateFileSystemEntries(directoryPath).Take(1).ToList();
             return true;
         }
         catch (UnauthorizedAccessException)

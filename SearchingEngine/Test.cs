@@ -6,7 +6,7 @@ public class Test
     {
         var startTimestamp = DateTime.Now;
         var fileSearcher = new FileSearcher("./indexes");
-        var result = fileSearcher.SearchByFileName("pom.xml");
+        var result = fileSearcher.SearchByFileContent("Printer");
         foreach (var searchResult in result)
         {
             Console.WriteLine(searchResult);

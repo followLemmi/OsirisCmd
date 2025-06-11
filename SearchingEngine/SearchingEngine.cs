@@ -4,6 +4,7 @@ using Lucene.Net.Index;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
+using Directory = System.IO.Directory;
 
 namespace SearchingEngine;
 
@@ -92,7 +93,7 @@ public class SearchingEngine
     public void Dispose()
     {
         _indexWriter.Dispose();
-        _directoryReader.Dispose();
+        _directoryReader?.Dispose();
         _analyzer.Dispose();
     }
 
@@ -110,8 +111,16 @@ public class SearchingEngine
     private void RefreshSearcher()
     {
         _directoryReader?.Dispose();
-        _directoryReader = DirectoryReader.Open(_indexWriter.Directory);
-        _indexSearcher = new IndexSearcher(_directoryReader);
+        try
+        {
+            _directoryReader = DirectoryReader.Open(_indexWriter.Directory);
+            _indexSearcher = new IndexSearcher(_directoryReader);
+        }
+        catch (IndexNotFoundException e)
+        {
+            _directoryReader = null;
+            _indexSearcher = null;
+        }
     }
 
 }
