@@ -45,13 +45,13 @@ public class FileSearcher
     
         // Windows системные папки  
         "System32", "SysWOW64", "WinSxS", "Temp", "Logs", 
-        "System Volume Information", "$Recycle.Bin",
+        "System Volume Information", "$Recycle.Bin", "Windows",
     
         // Папки разработки
-        "node_modules", ".git", ".svn", ".hg", "bin", "obj", "target", 
-        "build", "dist", "out", ".vs", ".vscode", ".idea", "packages", 
+        "node_modules", ".git", ".svn", ".hg", "bin", "obj", 
+        "build", "dist", "out", ".vs", ".idea", "packages", 
         "vendor", "__pycache__", ".pytest_cache", ".tox", "coverage", 
-        ".nyc_output", ".gradle", ".m2", ".ivy2", ".sbt",
+        ".nyc_output", ".gradle", ".ivy2", ".sbt",
     
         // Дополнительные кэши и временные папки
         "cache", "Cache", "tmp", "temp", "Temp", "logs", "Logs"
@@ -125,8 +125,8 @@ public class FileSearcher
     
     private void IndexFiles()
     {
-        var rootPath = "/";
-        Console.WriteLine($"Начинаем индексацию файлов в {rootPath}...");
+        var rootPath = "c://";
+        Console.WriteLine($"Strat indexing in {rootPath}...");
         
         try
         {
@@ -134,11 +134,11 @@ public class FileSearcher
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Критическая ошибка при индексации: {ex.Message}");
+            Console.WriteLine($"Error while indexing: {ex.Message}");
         }
         
         _searchingEngine.Commit();
-        Console.WriteLine("Индексация завершена!");
+        Console.WriteLine("Indexing complete!");
     }
 
     private void IndexDirectory(string directoryPath)
@@ -147,18 +147,16 @@ public class FileSearcher
         {
             if (ShouldSkipDirectory(directoryPath))
             {
-                Console.WriteLine($"Пропускаем директорию: {directoryPath}");
+                Console.WriteLine($"Skip directory: {directoryPath}");
                 return;
             }
-
-            // Проверяем доступность директории
+            
             if (!HasDirectoryAccess(directoryPath))
             {
-                Console.WriteLine($"Нет доступа к директории: {directoryPath}");
+                Console.WriteLine($"No permission to directory: {directoryPath}");
                 return;
             }
-
-            // Индексируем файлы в текущей директории
+            
             try
             {
                 var files = Directory.EnumerateFiles(directoryPath);
@@ -170,21 +168,20 @@ public class FileSearcher
                     }
                     catch (UnauthorizedAccessException)
                     {
-                        Console.WriteLine($"Нет доступа к файлу: {file}");
+                        Console.WriteLine($"No permission to file: {file}");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Ошибка при индексации файла {file}: {ex.Message}");
+                        Console.WriteLine($"Error indexing {file}: {ex.Message}");
                     }
                 }
             }
             catch (UnauthorizedAccessException)
             {
-                Console.WriteLine($"Нет доступа к файлам в директории: {directoryPath}");
+                Console.WriteLine($"No permission to directory: {directoryPath}");
                 return;
             }
-
-            // Рекурсивно обходим поддиректории
+            
             try
             {
                 var subdirectories = Directory.EnumerateDirectories(directoryPath);
@@ -195,12 +192,12 @@ public class FileSearcher
             }
             catch (UnauthorizedAccessException)
             {
-                Console.WriteLine($"Нет доступа к поддиректориям в: {directoryPath}");
+                Console.WriteLine($"No permission to directory: {directoryPath}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Ошибка при обработке директории {directoryPath}: {ex.Message}");
+            Console.WriteLine($"Error while processing directory {directoryPath}: {ex.Message}");
         }
     }
 
@@ -213,21 +210,18 @@ public class FileSearcher
         //     return;
         // }
         
-        // Пропускаем проект Osiris
-        if (Path.GetFullPath(file).Contains("Osiris") || file.Contains("/.") || file.Contains("\\."))
-        {
-            return;
-        }
+        // if (Path.GetFullPath(file).Contains("Osiris") || file.Contains("/.") || file.Contains("\\."))
+        // {
+        //     return;
+        // }
         
-        // Пропускаем очень большие файлы (больше 10MB)
-        if (fileInfo.Length > 10 * 1024 * 1024)
+        if (fileInfo.Length > 100 * 1024 * 1024)
         {
             return;
         }
         
         Console.WriteLine($"Indexing {file}");
         
-        // Определяем содержимое в зависимости от типа файла
         string content = GetFileContent(file);
         
         _searchingEngine.IndexFile(file, content);
@@ -237,7 +231,6 @@ public class FileSearcher
     {
         try
         {
-            // Пытаемся получить список файлов для проверки доступа
             Directory.EnumerateFileSystemEntries(directoryPath).Take(1).ToList();
             return true;
         }
@@ -260,7 +253,6 @@ public class FileSearcher
     {
         var extension = Path.GetExtension(filePath);
         
-        // Если это точно бинарный файл, не читаем содержимое
         if (BinaryExtensions.Contains(extension))
         {
             return "";
@@ -287,7 +279,7 @@ public class FileSearcher
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Ошибка чтения файла {filePath}: {ex.Message}");
+            Console.WriteLine($"Error file reading {filePath}: {ex.Message}");
             return "";
         }
     }
@@ -300,15 +292,13 @@ public class FileSearcher
             var buffer = new byte[Math.Min(sampleSize, (int)fileStream.Length)];
             int bytesRead = fileStream.Read(buffer, 0, buffer.Length);
             
-            if (bytesRead == 0) return true; // Пустой файл
+            if (bytesRead == 0) return true;
             
-            // Проверяем наличие null-байтов (признак бинарного файла)
             for (int i = 0; i < bytesRead; i++)
             {
                 if (buffer[i] == 0) return false;
             }
             
-            // Считаем процент печатных символов
             int printableCount = 0;
             for (int i = 0; i < bytesRead; i++)
             {
@@ -330,38 +320,34 @@ public class FileSearcher
 
     private static bool IsPrintableOrWhitespace(byte b)
     {
-        return (b >= 32 && b <= 126) || // Печатные ASCII символы
-               b == 9 ||  // Tab
-               b == 10 || // LF  
-               b == 13 || // CR
-               b >= 128;  // UTF-8 символы
+        return (b >= 32 && b <= 126) || //
+               b == 9 || 
+               b == 10 ||
+               b == 13 ||
+               b >= 128;
     }
 
     private bool ShouldSkipDirectory(string directoryPath)
     {
         var dirName = Path.GetFileName(directoryPath);
         var fullPath = Path.GetFullPath(directoryPath);
-    
-        // Проверяем системные директории Unix по полному пути
+        
         var unixSystemDirs = new[] { "/proc", "/sys", "/dev", "/run", "/tmp", "/var", "/snap", "/usr" };
         if (unixSystemDirs.Any(sysDir => fullPath.StartsWith(sysDir + "/") || fullPath == sysDir))
         {
             return true;
         }
-    
-        // Проверяем точные совпадения имен папок
+        
         if (SkipDirectories.Contains(dirName))
         {
             return true;
         }
-    
-        // Пропускаем скрытые папки (начинающиеся с точки) кроме важных
+        
         if (dirName.StartsWith(".") && !IsImportantHiddenDirectory(dirName))
         {
             return true;
         }
-    
-        // Пропускаем папки кэша
+        
         if (dirName.Contains("cache", StringComparison.OrdinalIgnoreCase) ||
             dirName.Contains("temp", StringComparison.OrdinalIgnoreCase))
         {
