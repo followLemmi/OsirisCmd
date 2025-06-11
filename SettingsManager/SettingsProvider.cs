@@ -53,6 +53,11 @@ public class SettingsProvider
         PluginSettings.Add(new PluginsListSettingProvider(settingName, settingsTabContent));
     }
 
+    public void RegisterApplicationSetting(string settingName, UserControl? settingsTabContent)
+    {
+        
+    }
+
     private static ApplicationSettings LoadSettings() 
     {
         if (!File.Exists(SettingsFileName))

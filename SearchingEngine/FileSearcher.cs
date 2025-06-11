@@ -75,7 +75,7 @@ public class FileSearcher
     public FileSearcher(string indexStoragePath)
     {
         _searchingEngine = new SearchingEngine(indexStoragePath);
-        IndexFiles();
+        // IndexFiles();
         var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);
@@ -138,7 +138,7 @@ public class FileSearcher
     
     private void IndexFiles()
     {
-        var rootPath = "c://workspace//jvl";
+        var rootPath = "c://";
         Console.WriteLine($"Strat indexing in {rootPath}...");
         
         try
@@ -256,10 +256,10 @@ public class FileSearcher
     {
         var extension = Path.GetExtension(filePath);
         
-        if (BinaryExtensions.Contains(extension))
-        {
-            return "";
-        }
+        // if (BinaryExtensions.Contains(extension))
+        // {
+        //     return "";
+        // }
 
         if (TextExtensions.Contains(extension))
         {
