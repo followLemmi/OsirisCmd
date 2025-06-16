@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.2.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="PluginsAPI">
+      <HintPath>..\OsirisCmd.PluginsAPI\bin\Debug\net9.0\OsirisCmd.PluginsAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="OsirisCmdSettingsManager">
+      <HintPath>..\OsirisCmd.SettingsManager\bin\Debug\net9.0\OsirisCmd.SettingsManager.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OsirisCmd.PluginsAPI\OsirisCmd.PluginsAPI.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\OsirisCmd.SettingsManager\OsirisCmd.SettingsManager.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>
