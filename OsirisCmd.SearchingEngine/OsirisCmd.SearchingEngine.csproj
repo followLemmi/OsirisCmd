@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -11,12 +11,22 @@
       <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00017" />
       <PackageReference Include="Lucene.Net.Queries" Version="4.8.0-beta00017" />
       <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00017" />
+      <PackageReference Include="Avalonia" Version="11.2.6" />
     </ItemGroup>
 
     <PropertyGroup>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\OsirisCmd.SettingsManager\OsirisCmd.SettingsManager.csproj" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="SettingsManager">
+            <HintPath>..\OsirisCmd.SettingsManager\bin\Debug\net9.0\OsirisCmd.SettingsManager.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 
 
 </Project>
