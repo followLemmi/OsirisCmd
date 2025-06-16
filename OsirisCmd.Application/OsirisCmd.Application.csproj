@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OsirisCmd.PluginsManager\OsirisCmd.PluginsManager.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\OsirisCmd.SearchingEngine\OsirisCmd.SearchingEngine.csproj" />
     <ProjectReference Include="..\OsirisCmd.SettingsManager\OsirisCmd.SettingsManager.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 

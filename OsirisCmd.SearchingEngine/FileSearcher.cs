@@ -2,6 +2,8 @@ using Lucene.Net.Analysis.Standard;
 using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
+using OsirisCmd.SearchingEngine.Components;
+using OsirisCmd.SettingsManager;
 
 namespace SearchingEngine;
 
@@ -74,8 +76,10 @@ public class FileSearcher
 
     public FileSearcher(string indexStoragePath)
     {
+        SettingsProvider.Instance.RegisterUI("FileSearching", new FileSearcherSettingsComponent());
+        var settings = SettingsProvider.Instance.AttachSettings<FileSearchingSettingsSection>("FileSearching");
         _searchingEngine = new SearchingEngine(indexStoragePath);
-        IndexFiles();
+        // IndexFiles();
         var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);

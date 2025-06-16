@@ -17,6 +17,6 @@ public class PluginsSettingsViewModel
 
     public void EnableDisablePlugin(Plugin plugin, bool enable)
     {
-        _settingsProvider.ApplicationSettings.PluginSettings.Single(p => p.Name == plugin.Name).Enabled = enable;
+        // _settingsProvider.ApplicationSettings.PluginSettings.Single(p => p.Name == plugin.Name).Enabled = enable;
     }
 }

@@ -66,31 +66,31 @@ public class PluginManager
             var pluginManifest = PluginManifest.ParsePluginManifest(pluginFolder + "/manifest.plug");
             try
             {
-                var pluginDllPath = Path.Combine(pluginFolder, pluginManifest.MainDllName);
-                var assembly = Assembly.LoadFile(pluginDllPath);
-                foreach (var type in assembly.GetTypes())
-                {
-                    if (!typeof(IOsirisCommanderPlugin).IsAssignableFrom(type) || type.IsInterface ||
-                        type.IsAbstract) continue;
-                    if (Activator.CreateInstance(type) is not IOsirisCommanderPlugin pluginInstance) continue;
-                    var pluginSettings = _settingsProvider.ApplicationSettings.PluginSettings
-                        .FirstOrDefault(p => p.Name == pluginInstance.Name);
-                    var pluginObject = new Plugin(pluginInstance.Name, pluginInstance.Description, pluginInstance.Author,
-                        pluginInstance.Version, pluginInstance.SettingsTabContent, pluginSettings == null || pluginSettings.Enabled);
-                    if (pluginObject.IsEnabled)
-                    {
-                        _plugins.Add(pluginObject);
-                        if (pluginObject.SettingsTabContent != null)
-                        {
-                            _settingsProvider.AddPluginSettings(pluginObject.Name, pluginObject.SettingsTabContent);
-                        }
-                    }
-                    _settingsProvider.ApplicationSettings.PluginSettings.Add(new PluginSettings()
-                    {
-                        Name = pluginObject.Name,
-                        Enabled = true
-                    });
-                }
+                // var pluginDllPath = Path.Combine(pluginFolder, pluginManifest.MainDllName);
+                // var assembly = Assembly.LoadFile(pluginDllPath);
+                // foreach (var type in assembly.GetTypes())
+                // {
+                //     if (!typeof(IOsirisCommanderPlugin).IsAssignableFrom(type) || type.IsInterface ||
+                //         type.IsAbstract) continue;
+                //     if (Activator.CreateInstance(type) is not IOsirisCommanderPlugin pluginInstance) continue;
+                //     // var pluginSettings = _settingsProvider.ApplicationSettings.PluginSettings
+                //     //     .FirstOrDefault(p => p.Name == pluginInstance.Name);
+                //     var pluginObject = new Plugin(pluginInstance.Name, pluginInstance.Description, pluginInstance.Author,
+                //         pluginInstance.Version, pluginInstance.SettingsTabContent, pluginSettings == null || pluginSettings.Enabled);
+                //     if (pluginObject.IsEnabled)
+                //     {
+                //         _plugins.Add(pluginObject);
+                //         if (pluginObject.SettingsTabContent != null)
+                //         {
+                //             // _settingsProvider.AddPluginSettings(pluginObject.Name, pluginObject.SettingsTabContent);
+                //         }
+                //     }
+                //     // _settingsProvider.ApplicationSettings.PluginSettings.Add(new PluginSettings()
+                //     // {
+                //     //     Name = pluginObject.Name,
+                //     //     Enabled = true
+                //     // });
+                // }
             }
             catch (ReflectionTypeLoadException ex)
             {

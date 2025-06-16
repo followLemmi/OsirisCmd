@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using OsirisCmd.PluginsManager;
 using OsirisCmd.SettingsManager;
+using SearchingEngine;
 
 namespace Application;
 
@@ -20,6 +21,7 @@ public partial class App : Avalonia.Application
             var mainWindow = new MainWindow();
             SettingsProvider.Initialize();
             PluginManager.Initialize();
+            FileSearcher fileSearcher = new FileSearcher("./indexes");
             desktop.MainWindow = mainWindow;
         }
 

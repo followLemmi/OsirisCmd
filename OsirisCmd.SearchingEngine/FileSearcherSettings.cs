@@ -1,12 +1,11 @@
 using Avalonia.Controls;
-using OsirisCmd.SearchingEngine.Components;
+using OsirisCmd.SettingsManager;
 
 namespace SearchingEngine;
 
-public class FileSearchingSettings : ISettingsSection {
+public class FileSearchingSettingsSection : ISettingsSection {
 
-    public string SectionName => "File Searching";
+    public string SectionName => "FileSearching";
 
-    public UserControl SettingsTabContent => new FileSearcherSettingsComponent();
-
+    public ISettings GetSettings => new FileSearchingSettings();
 }
