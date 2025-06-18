@@ -10,6 +10,5 @@ public partial class FileSearcherSettingsComponent : UserControl
     public FileSearcherSettingsComponent()
     {
         InitializeComponent();
-        DataContext = new FileSearcherSettingsViewModel();
     }
 }

@@ -10,6 +10,13 @@ public class FileSearcherSettingsViewModel
     public FileSearcherSettingsViewModel()
     {
         Settings = SettingsProvider.Instance.AttachSettings<FileSearchingSettingsSection>("FileSearchingSettings")?.Settings as FileSearcherSettings;
+        foreach (var settingItem in Settings.Settings)
+        {
+            settingItem.PropertyChanged += (sender, args) =>
+            {
+                // Console.WriteLine("Property changed:");
+            };
+        }
     }
     
 }

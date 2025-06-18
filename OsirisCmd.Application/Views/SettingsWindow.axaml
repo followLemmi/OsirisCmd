@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Application.Views.SettingsWindow"
         Title="SettingsWindow"
-        Width="400" Height="600"
+        Width="600" Height="400"
         x:DataType="viewModels:SettingsWindowViewModel">
 
     <Window.DataContext>
@@ -14,17 +14,6 @@
     </Window.DataContext>
 
     <TabControl TabStripPlacement="Left" ItemsSource="{Binding Tabs}">   
-        <!-- <TabControl.ItemTemplate> -->
-        <!--     <DataTemplate> -->
-        <!--         <TextBlock Text="{Binding Name}" /> -->
-        <!--     </DataTemplate> -->
-        <!-- </TabControl.ItemTemplate> -->
-        <!-- <TabControl.ContentTemplate> -->
-        <!--     <DataTemplate> -->
-        <!--         <ContentControl></ContentControl> -->
-        <!--         ~1~ <ContentPresenter Content="{Binding Settings}" /> @1@ -->
-        <!--     </DataTemplate> -->
-        <!-- </TabControl.ContentTemplate> -->
     </TabControl>
 
 </Window>

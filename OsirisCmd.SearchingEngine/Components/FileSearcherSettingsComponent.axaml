@@ -3,18 +3,21 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:OsirisCmd.SearchingEngine.ViewModels"
+             xmlns:templates="clr-namespace:OsirisCmd.SearchingEngine.Components.Templates"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OsirisCmd.SearchingEngine.Components.FileSearcherSettingsComponent"
              x:DataType="viewModels:FileSearcherSettingsViewModel">
-    
-    <UserControl.DataContext><viewModels:FileSearcherSettingsViewModel></viewModels:FileSearcherSettingsViewModel></UserControl.DataContext>
-    
+
+    <UserControl.DataContext>
+        <viewModels:FileSearcherSettingsViewModel></viewModels:FileSearcherSettingsViewModel>
+    </UserControl.DataContext>
+
     <DockPanel>
-       <DataGrid ItemsSource="{Binding Settings}">
-           <DataGrid.Columns>
-               <DataGridCheckBoxColumn Header="Enable Indexing" Binding="{Binding FileSearcherEnabled}"></DataGridCheckBoxColumn>
-           </DataGrid.Columns>
-       </DataGrid> 
+        <ItemsControl ItemsSource="{Binding Settings.Settings}">
+            <ItemsControl.ItemTemplate>
+                <templates:FileSearcherSettingsTemplate/>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </DockPanel>
-    
+
 </UserControl>
