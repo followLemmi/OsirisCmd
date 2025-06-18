@@ -1,11 +1,11 @@
-using Avalonia.Controls;
-using OsirisCmd.SettingsManager;
+﻿using OsirisCmd.SettingsManager;
 
-namespace SearchingEngine;
+namespace OsirisCmd.SearchingEngine;
 
-public class FileSearchingSettingsSection : ISettingsSection {
+public class FileSearcherSettings : ISettings
+{
+    public bool FileSearcherEnabled { get; set; }
+    
+    public List<string> ExtensionExclude = [];
 
-    public string SectionName => "FileSearching";
-
-    public ISettings GetSettings => new FileSearchingSettings();
 }

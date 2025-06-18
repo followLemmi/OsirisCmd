@@ -1,9 +1,6 @@
-﻿using System.Collections.ObjectModel;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Avalonia.Collections;
 using Avalonia.Controls;
-using OsirisCmd.SettingsManager.Converters;
-using SettingsManager.Events;
 
 namespace OsirisCmd.SettingsManager;
 
@@ -32,7 +29,7 @@ public class SettingsProvider
     private SettingsProvider()
     {
         _instance = this;
-        SettingChangedEvent.SettingChanged += SettingChangedEventHandler;
+        SettingsSections.CollectionChanged += (_,_) => SaveSettings();
         LoadSettings();
     }
 

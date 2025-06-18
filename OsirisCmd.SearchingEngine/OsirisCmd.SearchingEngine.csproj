@@ -7,11 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Lucene.Net" Version="4.8.0-beta00017" />
-      <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00017" />
-      <PackageReference Include="Lucene.Net.Queries" Version="4.8.0-beta00017" />
-      <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00017" />
-      <PackageReference Include="Avalonia" Version="11.2.6" />
+        <PackageReference Include="Lucene.Net" Version="4.8.0-beta00017"/>
+        <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00017"/>
+        <PackageReference Include="Lucene.Net.Queries" Version="4.8.0-beta00017"/>
+        <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00017"/>
+        <PackageReference Include="Avalonia" Version="11.2.6"/>
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.6" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -19,14 +20,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\OsirisCmd.SettingsManager\OsirisCmd.SettingsManager.csproj" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\OsirisCmd.SettingsManager\OsirisCmd.SettingsManager.csproj"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="SettingsManager">
-            <HintPath>..\OsirisCmd.SettingsManager\bin\Debug\net9.0\OsirisCmd.SettingsManager.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
 
 </Project>

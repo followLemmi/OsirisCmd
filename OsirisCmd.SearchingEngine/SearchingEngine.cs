@@ -4,9 +4,8 @@ using Lucene.Net.Index;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
-using Directory = System.IO.Directory;
 
-namespace SearchingEngine;
+namespace OsirisCmd.SearchingEngine;
 
 public class SearchingEngine
 {

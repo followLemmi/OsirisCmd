@@ -3,7 +3,7 @@ using OsirisCmd.SettingsManager;
 
 public interface ISettingsSection {
 
-    string SectionName { get; }
+    string Name { get; }
     
-    ISettings GetSettings { get; }
+    ISettings Settings { get; }
 }

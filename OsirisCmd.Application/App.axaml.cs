@@ -2,8 +2,8 @@ using Application.Views;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using OsirisCmd.PluginsManager;
+using OsirisCmd.SearchingEngine;
 using OsirisCmd.SettingsManager;
-using SearchingEngine;
 
 namespace Application;
 

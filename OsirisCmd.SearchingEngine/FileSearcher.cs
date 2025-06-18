@@ -5,11 +5,11 @@ using Lucene.Net.Util;
 using OsirisCmd.SearchingEngine.Components;
 using OsirisCmd.SettingsManager;
 
-namespace SearchingEngine;
+namespace OsirisCmd.SearchingEngine;
 
 public class FileSearcher
 {
-    private readonly SearchingEngine _searchingEngine;
+    private readonly global::OsirisCmd.SearchingEngine.SearchingEngine _searchingEngine;
     private readonly QueryParser _fileNameParser;
     private readonly QueryParser _fileContentParser;
     private readonly MultiFieldQueryParser _multiFieldParser;
@@ -77,8 +77,8 @@ public class FileSearcher
     public FileSearcher(string indexStoragePath)
     {
         SettingsProvider.Instance.RegisterUI("FileSearching", new FileSearcherSettingsComponent());
-        var settings = SettingsProvider.Instance.AttachSettings<FileSearchingSettingsSection>("FileSearching");
-        _searchingEngine = new SearchingEngine(indexStoragePath);
+        // var settings = SettingsProvider.Instance.AttachSettings<FileSearchingSettingsSection>("FileSearching");
+        _searchingEngine = new global::OsirisCmd.SearchingEngine.SearchingEngine(indexStoragePath);
         // IndexFiles();
         var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);

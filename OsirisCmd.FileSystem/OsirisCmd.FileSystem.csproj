@@ -6,14 +6,14 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <ItemGroup>
-        <Reference Include="DBStorageAdapter">
-            <HintPath>..\OsirisCmd.DBStorageAdapter\bin\Debug\net9.0\OsirisCmd.DBStorageAdapter.dll</HintPath>
-        </Reference>
-    </ItemGroup>
+    <!-- <ItemGroup> -->
+    <!--     <Reference Include="DBStorageAdapter"> -->
+    <!--         <HintPath>..\OsirisCmd.DBStorageAdapter\bin\Debug\net9.0\OsirisCmd.DBStorageAdapter.dll</HintPath> -->
+    <!--     </Reference> -->
+    <!-- </ItemGroup> -->
     
     <ItemGroup>
-        <ProjectReference Include="..\OsirisCmd.DBStorageAdapter\OsirisCmd.DBStorageAdapter.csproj" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\OsirisCmd.DBStorageAdapter\OsirisCmd.DBStorageAdapter.csproj" />
     </ItemGroup>
     
     <ItemGroup>

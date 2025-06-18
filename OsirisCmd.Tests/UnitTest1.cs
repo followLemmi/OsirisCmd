@@ -1,4 +1,4 @@
-﻿using SearchingEngine;
+﻿using OsirisCmd.SearchingEngine;
 using Xunit.Abstractions;
 
 namespace OsirisCmd.Tests;

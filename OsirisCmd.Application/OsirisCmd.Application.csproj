@@ -20,19 +20,19 @@
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.6" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="PluginsManager">
-      <HintPath>..\OsirisCmd.PluginsManager\bin\Debug\net9.0\OsirisCmd.PluginsManager.dll</HintPath>
-    </Reference>
-    <Reference Include="SettingsManager">
-      <HintPath>..\OsirisCmd.SettingsManager\bin\Debug\net9.0\OsirisCmd.SettingsManager.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+  <!-- <ItemGroup> -->
+  <!--   <Reference Include="PluginsManager"> -->
+  <!--     <HintPath>..\OsirisCmd.PluginsManager\bin\Debug\net9.0\OsirisCmd.PluginsManager.dll</HintPath> -->
+  <!--   </Reference> -->
+  <!--   <Reference Include="SettingsManager"> -->
+  <!--     <HintPath>..\OsirisCmd.SettingsManager\bin\Debug\net9.0\OsirisCmd.SettingsManager.dll</HintPath> -->
+  <!--   </Reference> -->
+  <!-- </ItemGroup> -->
 
   <ItemGroup>
-    <ProjectReference Include="..\OsirisCmd.PluginsManager\OsirisCmd.PluginsManager.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\OsirisCmd.PluginsManager\OsirisCmd.PluginsManager.csproj" />
     <ProjectReference Include="..\OsirisCmd.SearchingEngine\OsirisCmd.SearchingEngine.csproj" />
-    <ProjectReference Include="..\OsirisCmd.SettingsManager\OsirisCmd.SettingsManager.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\OsirisCmd.SettingsManager\OsirisCmd.SettingsManager.csproj" />
   </ItemGroup>
 
   <ItemGroup>
