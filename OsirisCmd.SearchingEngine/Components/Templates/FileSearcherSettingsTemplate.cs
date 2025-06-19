@@ -4,6 +4,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Lucene.Net.Util.Automaton;
+using OsirisCmd.SearchingEngine.Converters;
 using OsirisCmd.SettingsManager;
 using SettingsManager.Events;
 
@@ -50,8 +51,13 @@ public class FileSearcherSettingsTemplate : IDataTemplate
                     },
                     new TextBox()
                     {
-                        Text = string.Join(", ", (List<string>)setting.Value),
-                        VerticalAlignment = VerticalAlignment.Center
+                        VerticalAlignment = VerticalAlignment.Center,
+                        [!TextBox.TextProperty] = new Binding("Value")
+                        {
+                            Mode = BindingMode.TwoWay,
+                            Converter = new StringListConverter(),
+                            Source = setting
+                        }
                     }
                 }
             },

@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using Avalonia.Controls;
 
 namespace Application.Views;
 
@@ -8,4 +9,5 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
     }
+
 }

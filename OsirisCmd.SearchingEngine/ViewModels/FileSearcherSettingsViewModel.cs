@@ -10,7 +10,7 @@ public class FileSearcherSettingsViewModel
 
     public FileSearcherSettingsViewModel()
     {
-        Settings = SettingsProvider.Instance.AttachSettings<FileSearchingSettingsSection>("FileSearchingSettings")?.Settings as FileSearcherSettings;
+        Settings = SettingsProvider.Instance.AttachSettings<FileSearcherSettings>();
     }
     
 }

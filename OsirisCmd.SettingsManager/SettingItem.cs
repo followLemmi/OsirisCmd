@@ -1,10 +1,14 @@
 ﻿using System.ComponentModel;
+using System.Text.Json.Serialization;
+using OsirisCmd.SettingsManager.Converters;
 
 namespace OsirisCmd.SettingsManager;
 
+[JsonConverter(typeof(SettingsItemConverter))]
 public class SettingItem : INotifyPropertyChanged
 {
     public string Name { get; set; }
+    public string Type { get; set; } = string.Empty;
     private object _value;
 
     public object Value

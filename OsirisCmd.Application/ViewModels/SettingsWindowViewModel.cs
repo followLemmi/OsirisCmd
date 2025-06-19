@@ -13,18 +13,13 @@ public class SettingsWindowViewModel
 
     public SettingsWindowViewModel()
     {
-        // Settings = [];
-        // foreach (var pluginSetting in _settingsProvider.PluginSettings)
-        // {
-        //     Settings?.Add(pluginSetting);
-        // }
         Tabs = [];
         foreach (var settingTab in _settingsProvider.UIComponents)
         {
             Tabs.Add(new TabItem()
             {
                 Header = settingTab.Key,
-                Content = settingTab.Value
+                Content = settingTab.Value()
             });
         }
     }

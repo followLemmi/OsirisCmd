@@ -76,7 +76,7 @@ public class FileSearcher
 
     public FileSearcher(string indexStoragePath)
     {
-        SettingsProvider.Instance.RegisterUI("FileSearching", new FileSearcherSettingsComponent());
+        SettingsProvider.Instance.RegisterUI("FileSearching", () => new FileSearcherSettingsComponent());
         // var settings = SettingsProvider.Instance.AttachSettings<FileSearchingSettingsSection>("FileSearching");
         _searchingEngine = new global::OsirisCmd.SearchingEngine.SearchingEngine(indexStoragePath);
         // IndexFiles();

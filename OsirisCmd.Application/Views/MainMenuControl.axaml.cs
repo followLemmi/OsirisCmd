@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 
 namespace Application.Views;
 
@@ -14,8 +15,8 @@ public partial class MainMenuControl : UserControl
     
     private void OpenSettingsHandler(object? sender, RoutedEventArgs e)
     {
-        var settingsWindow = new Application.Views.SettingsWindow();
-        settingsWindow.ShowDialog((Window) this.VisualRoot);
+        var settingsWindow = new SettingsWindow();
+        settingsWindow.ShowDialog(this.GetVisualRoot() as Window);
     }
 
     private void GroupRenameHandler(object? sender, RoutedEventArgs e)

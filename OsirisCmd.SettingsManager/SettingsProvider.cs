@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Avalonia.Collections;
 using Avalonia.Controls;
+using OsirisCmd.SettingsManager.Converters;
 using SettingsManager.Events;
 
 namespace OsirisCmd.SettingsManager;
@@ -11,8 +12,14 @@ public class SettingsProvider
 
     private static SettingsProvider? _instance;
 
-    public AvaloniaDictionary<string, ISettingsSection> SettingsSections { get; } = new();
-    public AvaloniaDictionary<string, UserControl> UIComponents { get; } = new();
+    private JsonSerializerOptions _serializerOptions = new JsonSerializerOptions()
+    {
+        WriteIndented = true,
+        Converters = { new SettingsItemConverter() }
+    };
+
+    public AvaloniaDictionary<string, ISettings> SettingsSections { get; } = new();
+    public AvaloniaDictionary<string, Func<UserControl>> UIComponents { get; } = new();
     private Dictionary<string, JsonElement> _pendingSettings { get; } = new();
 
     public static SettingsProvider Instance
@@ -23,6 +30,7 @@ public class SettingsProvider
             {
                 throw new InvalidOperationException("Settings provider has not been initialized.");
             }
+
             return _instance;
         }
     }
@@ -31,7 +39,7 @@ public class SettingsProvider
     {
         _instance = this;
         LoadSettings();
-        
+
         SettingChangedEvent.SettingChanged += (SaveSettings);
     }
 
@@ -41,18 +49,19 @@ public class SettingsProvider
         {
             throw new InvalidOperationException("Settings provider has already been initialized.");
         }
+
         _instance = new SettingsProvider();
-        
     }
 
-    private void LoadSettings() 
+    private void LoadSettings()
     {
         if (!File.Exists(SettingsFileName))
         {
             SaveSettings();
         }
+
         var json = File.ReadAllText(SettingsFileName);
-        var parsed = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+        var parsed = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json, _serializerOptions);
 
         if (parsed == null) return;
         foreach (var (key, value) in parsed)
@@ -66,29 +75,22 @@ public class SettingsProvider
         var jsonDictionary = new Dictionary<string, object>();
         foreach (var (key, settingsSection) in SettingsSections)
         {
-            jsonDictionary[settingsSection.Name] = settingsSection.Settings;
+            jsonDictionary[settingsSection.GetType().Name] = settingsSection;
         }
 
-        var json = JsonSerializer.Serialize(jsonDictionary, new JsonSerializerOptions()
-        {
-            WriteIndented = true
-        });
-        
+        var json = JsonSerializer.Serialize(jsonDictionary, _serializerOptions);
+
         File.WriteAllText(SettingsFileName, json);
     }
 
-    public void RegisterUI(string sectionName, UserControl uiComponent) 
+    public void RegisterUI(string sectionName, Func<UserControl> uiComponent)
     {
         UIComponents[sectionName] = uiComponent;
     }
 
-    public UserControl? GetUI(string sectionName)
+    public T? AttachSettings<T>() where T : class, ISettings, new()
     {
-        return UIComponents[sectionName];
-    }
-
-    public T? AttachSettings<T>(string sectionName) where T : class, ISettingsSection, new()
-    {
+        var sectionName = typeof(T).Name;
         if (SettingsSections.TryGetValue(sectionName, out var settingsSection))
         {
             return settingsSection as T;
@@ -96,12 +98,12 @@ public class SettingsProvider
 
         if (_pendingSettings.TryGetValue(sectionName, out var jsonElement))
         {
-            var settings = jsonElement.Deserialize<T>() ?? new T();
+            var settings = jsonElement.Deserialize<T>(_serializerOptions) ?? new T();
             SettingsSections[sectionName] = settings;
             _pendingSettings.Remove(sectionName);
             return SettingsSections[sectionName] as T;
         }
-        
+
         var freshSettings = new T();
         SettingsSections[sectionName] = freshSettings;
         SaveSettings();
