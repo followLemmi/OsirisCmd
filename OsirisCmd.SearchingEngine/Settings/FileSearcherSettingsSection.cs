@@ -1,10 +1,15 @@
 using OsirisCmd.SettingsManager;
 
-namespace OsirisCmd.SearchingEngine;
+namespace OsirisCmd.SearchingEngine.Settings;
 
 public class FileSearchingSettingsSection : ISettingsSection {
 
     public string Name => "FileSearching";
 
-    public ISettings Settings => new FileSearcherSettings();
+    public ISettings Settings { get; set; }
+    
+    public FileSearchingSettingsSection()
+    {
+        Settings = new FileSearcherSettings();
+    }
 }

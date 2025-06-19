@@ -31,16 +31,8 @@ public class SettingsProvider
     {
         _instance = this;
         LoadSettings();
-        SettingsSections.PropertyChanged += (sender, args) =>
-        {
-            Console.WriteLine("Settings changed");
-        };
-        // SettingChangedEvent.SettingChanged += SaveSettings;
-    }
-
-    private void SettingChangedEventHandler()
-    {
-        SaveSettings();
+        
+        SettingChangedEvent.SettingChanged += (SaveSettings);
     }
 
     public static void Initialize()
@@ -50,6 +42,7 @@ public class SettingsProvider
             throw new InvalidOperationException("Settings provider has already been initialized.");
         }
         _instance = new SettingsProvider();
+        
     }
 
     private void LoadSettings() 
@@ -94,25 +87,10 @@ public class SettingsProvider
         return UIComponents[sectionName];
     }
 
-    private void ObserveSettings(ISettingsSection settingsSection)
-    {
-        foreach (var (key, value) in SettingsSections)
-        {
-            foreach (var settingItem in value.Settings.Settings)
-            {
-                settingItem.PropertyChanged += (sender, args) =>
-                {
-                    Console.WriteLine("Property changed:");
-                };
-            } 
-        }
-    }
-
     public T? AttachSettings<T>(string sectionName) where T : class, ISettingsSection, new()
     {
         if (SettingsSections.TryGetValue(sectionName, out var settingsSection))
         {
-            ObserveSettings(settingsSection);
             return settingsSection as T;
         }
 
@@ -120,15 +98,13 @@ public class SettingsProvider
         {
             var settings = jsonElement.Deserialize<T>() ?? new T();
             SettingsSections[sectionName] = settings;
-            ObserveSettings(settings);
             _pendingSettings.Remove(sectionName);
-            return settings;
+            return SettingsSections[sectionName] as T;
         }
         
         var freshSettings = new T();
         SettingsSections[sectionName] = freshSettings;
-        ObserveSettings(freshSettings);
         SaveSettings();
-        return freshSettings;
+        return SettingsSections[sectionName] as T;
     }
 }
