@@ -27,4 +27,5 @@ public class SettingItem : INotifyPropertyChanged
     private void OnPropertyChanged(string propertyName) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+    public override string ToString() => $"SettingItem {Name}: Value = {Value}, Type = ({Type})";
 }

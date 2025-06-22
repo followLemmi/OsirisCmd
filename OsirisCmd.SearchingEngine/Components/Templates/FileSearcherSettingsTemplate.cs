@@ -6,7 +6,7 @@ using Avalonia.Layout;
 using Lucene.Net.Util.Automaton;
 using OsirisCmd.SearchingEngine.Converters;
 using OsirisCmd.SettingsManager;
-using SettingsManager.Events;
+using OsirisCmd.SettingsManager.Events;
 
 namespace OsirisCmd.SearchingEngine.Components.Templates;
 
@@ -15,7 +15,7 @@ public class FileSearcherSettingsTemplate : IDataTemplate
     public Control? Build(object? param)
     {
         var setting = param as SettingItem;
-        setting!.PropertyChanged += (sender, args) => SettingChangedEvent.Invoke();
+        setting!.PropertyChanged += (sender, args) => SettingChangedEvent.Invoke(setting);
 
         return setting.Value switch
         {
