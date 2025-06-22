@@ -13,6 +13,7 @@
         <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00017"/>
         <PackageReference Include="Avalonia" Version="11.2.6"/>
         <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.6" />
+        <PackageReference Include="Serilog" Version="4.3.1-dev-02373" />
     </ItemGroup>
 
     <PropertyGroup>

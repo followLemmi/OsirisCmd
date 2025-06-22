@@ -18,16 +18,13 @@
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.6" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0-preview.5.25277.114" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0-preview.5.25277.114" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0-preview.5.25277.114" />
+    <PackageReference Include="Serilog" Version="4.3.1-dev-02373" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.1-dev-02317" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
-
-  <!-- <ItemGroup> -->
-  <!--   <Reference Include="PluginsManager"> -->
-  <!--     <HintPath>..\OsirisCmd.PluginsManager\bin\Debug\net9.0\OsirisCmd.PluginsManager.dll</HintPath> -->
-  <!--   </Reference> -->
-  <!--   <Reference Include="SettingsManager"> -->
-  <!--     <HintPath>..\OsirisCmd.SettingsManager\bin\Debug\net9.0\OsirisCmd.SettingsManager.dll</HintPath> -->
-  <!--   </Reference> -->
-  <!-- </ItemGroup> -->
 
   <ItemGroup>
     <ProjectReference Include="..\OsirisCmd.PluginsManager\OsirisCmd.PluginsManager.csproj" />
@@ -45,4 +42,10 @@
   <Target Name="CreatePluginsFolder" AfterTargets="AfterBuild">
     <MakeDir Directories="$(OutputPath)plugins" />
   </Target>
+  
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
