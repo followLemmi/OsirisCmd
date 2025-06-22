@@ -12,8 +12,8 @@
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AThrowHelper_002ESerialization_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003FUsers_003Fekhar_003FAppData_003FRoaming_003FJetBrains_003FRider2025_002E1_003Fresharper_002Dhost_003FSourcesCache_003F6f4af9413b11943bfdd164b58f2c3faa476fb6ffee3bb2d63ea7882b139c1_003FThrowHelper_002ESerialization_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003ATopLevel_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003FUsers_003FEvgenyK_003FAppData_003FRoaming_003FJetBrains_003FRider2025_002E1_003Fresharper_002Dhost_003FSourcesCache_003Fa1df89bf16fef444a7356cf25fca11bf1b4d3e59e83ee83786986864a9b343_003FTopLevel_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AVisual_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003FUsers_003FEvgenyK_003FAppData_003FRoaming_003FJetBrains_003FRider2025_002E1_003Fresharper_002Dhost_003FSourcesCache_003F2af0134e7ab9169f6d3ec32e105e8d59b120c335d94b12c532896058ca5fd5_003FVisual_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=365857af_002De42e_002D445b_002D8f0a_002De533dc91e128/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::E76F5E13-DE4B-410C-AF73-4554FA3640AC::net9.0::OsirisCmd.Tests.UnitTest1.Test1&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=365857af_002De42e_002D445b_002D8f0a_002De533dc91e128/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;xUnit::E76F5E13-DE4B-410C-AF73-4554FA3640AC::net9.0::OsirisCmd.Tests.UnitTest1.Test1&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

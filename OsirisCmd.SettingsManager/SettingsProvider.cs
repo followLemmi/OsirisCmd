@@ -1,7 +1,9 @@
-﻿using System.Text.Json;
+﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using OsirisCmd.SettingsManager.Converters;
+using Serilog;
 using SettingsManager.Events;
 
 namespace OsirisCmd.SettingsManager;
@@ -45,6 +47,7 @@ public class SettingsProvider
 
     public static void Initialize()
     {
+        Log.Debug("Initialize SettingsProvider");
         if (_instance != null)
         {
             throw new InvalidOperationException("Settings provider has already been initialized.");
