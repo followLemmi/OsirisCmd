@@ -1,8 +1,10 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Lucene.Net.Util.Automaton;
 using OsirisCmd.SearchingEngine.Converters;
 using OsirisCmd.SettingsManager;
@@ -19,46 +21,79 @@ public class FileSearcherSettingsTemplate : IDataTemplate
 
         return setting.Value switch
         {
-            bool _ => new StackPanel()
+            bool _ => new Grid()
             {
-                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                Margin = new Thickness(0, 5, 0, 5),
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition() { Width = GridLength.Auto },
+                    new ColumnDefinition() { Width = GridLength.Star },
+                    new ColumnDefinition() {Width = GridLength.Auto}
+                },
                 Children =
                 {
                     new TextBlock()
                     {
                         Text = setting.Name,
-                        Width = 200,
-                        VerticalAlignment = VerticalAlignment.Center
+                        FontSize = 16,
+                        VerticalAlignment = VerticalAlignment.Stretch,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        [Grid.ColumnProperty] = 0       
                     },
                     new CheckBox()
                     {
                         IsChecked = (bool)setting.Value,
                         [!ToggleButton.IsCheckedProperty] = new Binding("Value", BindingMode.TwoWay),
-                        VerticalAlignment = VerticalAlignment.Center
+                        VerticalAlignment = VerticalAlignment.Stretch,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        [Grid.ColumnProperty] = 2    
                     }
                 }
             },
-            List<string> _ => new StackPanel()
+            List<string> _ => new Grid()
             {
-                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Margin = new Thickness(0, 5, 0, 5),
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition() { Width = GridLength.Auto },   
+                    new ColumnDefinition() { Width = GridLength.Star },
+                    new ColumnDefinition() {Width = GridLength.Auto}
+                },
                 Children =
                 {
                     new TextBlock()
                     {
                         Text = setting.Name,
-                        Width = 200,
-                        VerticalAlignment = VerticalAlignment.Center
+                        VerticalAlignment = VerticalAlignment.Center,
+                        [Grid.ColumnProperty] = 0
                     },
                     new TextBox()
                     {
                         VerticalAlignment = VerticalAlignment.Center,
+                        Width = 400,
                         [!TextBox.TextProperty] = new Binding("Value")
                         {
                             Mode = BindingMode.TwoWay,
                             Converter = new StringListConverter(),
                             Source = setting
-                        }
+                        },
+                        TextWrapping = TextWrapping.Wrap,
+                        [Grid.ColumnProperty] = 2
                     }
+                }
+            },
+            List<SettingItem> s => new Expander()
+            {
+                Header = setting.Name,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Margin = new Thickness(0, 5, 0, 5),
+                Content = new ItemsControl()
+                {
+                    ItemsSource = s,
+                    ItemTemplate = this,
                 }
             },
             _ => new TextBlock()
