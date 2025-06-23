@@ -6,6 +6,7 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Lucene.Net.Util.Automaton;
+using OsirisCmd.Localization;
 using OsirisCmd.SearchingEngine.Converters;
 using OsirisCmd.SettingsManager;
 using OsirisCmd.SettingsManager.Events;
@@ -36,7 +37,7 @@ public class FileSearcherSettingsTemplate : IDataTemplate
                 {
                     new TextBlock()
                     {
-                        Text = setting.Name,
+                        Text = LocalizationService.GetString(setting.Name) ?? setting.Name,
                         FontSize = 16,
                         VerticalAlignment = VerticalAlignment.Stretch,
                         HorizontalAlignment = HorizontalAlignment.Center,
