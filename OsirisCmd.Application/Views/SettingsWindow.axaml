@@ -13,7 +13,7 @@
         <viewModels:SettingsWindowViewModel />
     </Window.DataContext>
 
-    <TabControl TabStripPlacement="Left" ItemsSource="{Binding Tabs}">   
+    <TabControl TabStripPlacement="Left" ItemsSource="{Binding Tabs}">
     </TabControl>
 
 </Window>

@@ -11,6 +11,7 @@
     <DockPanel>
         <views:MainMenuControl DockPanel.Dock="Top"/>
         <TextBlock />
+        
     </DockPanel>
 
 

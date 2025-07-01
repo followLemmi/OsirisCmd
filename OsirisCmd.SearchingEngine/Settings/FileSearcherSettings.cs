@@ -5,8 +5,8 @@ namespace OsirisCmd.SearchingEngine.Settings;
 
 public class FileSearcherSettings : ISettings
 {
-
-    public ObservableCollection<SettingItem> Settings { get; set; } = [
+    public ObservableCollection<SettingItem> Settings { get; set; } =
+    [
         new()
         {
             Name = "FileIndexingEnabled",
@@ -20,22 +20,59 @@ public class FileSearcherSettings : ISettings
                 new()
                 {
                     Name = "SkipDirectories",
-                    Value = new List<string>()
+                    Value = new List<SettingItem>()
                     {
-                        "/proc",
-                        "/sys",
-                        "/run",
-                        "/var/run",
-                        "/var/lock",
-                        "/var/tmp",
-                        "/tmp",
-                        "/var/log",
-                        "/var/spool",
-                        "/var/cache",
-                        "/lost+found",
-                        "/boot",
-                        "/home/user/.cache",
-                        "/home/user/.thumbnails",
+                        new()
+                        {
+                            Name = "Linux",
+                            Value = new List<string>()
+                            {
+                                "/proc",
+                                "/sys",
+                                "/run",
+                                "/bin",
+                                "/sbin",
+                                "/tmp",
+                                "/boot",
+                                "/var/run",
+                                "/var/lock",
+                                "/var/tmp",
+                                "/var/log",
+                                "/var/spool",
+                                "/var/cache",
+                                "/lost+found",
+                                "/home/user/.cache",
+                                "/home/user/.thumbnails",
+                            }
+                        },
+                        new ()
+                        {
+                            Name = "Windows",
+                            Value = new List<string>()
+                            {
+                                "C:\\Windows",
+                                "C:\\ProgramData",
+                                "C:\\$Recycle.Bin",
+                                "C:\\System Volume Information",
+                            }
+                        },
+                        new ()
+                        {
+                            Name = "MacOS",
+                            Value = new List<string>()
+                            {
+                                "/System",
+                                "/private",
+                                "/usr/local",
+                                "/usr/share",
+                                "/usr/lib",
+                                "/usr/bin",
+                                "/usr/sbin",
+                                "/.Trash",
+                                "/.Spotlight-V100",
+                                "/.fseventsd",
+                            }
+                        }
                     }
                 },
                 new()
@@ -50,12 +87,19 @@ public class FileSearcherSettings : ISettings
         },
         new()
         {
-            Name = "ExcludedExtensions",
-            Value = new List<string>()
+            Name = "FileSettings",
+            Value = new List<SettingItem>()
             {
-                
+                new()
+                {
+                    Name = "FileNameOnly",
+                    Value = new List<string>()
+                    {
+                        ".exe",
+                        ""
+                    }
+                }
             }
-        }
+        },
     ];
-    
 }
