@@ -43,7 +43,7 @@ public class FileSearcherSettingsTemplate : IDataTemplate
                         HorizontalAlignment = HorizontalAlignment.Center,
                         [Grid.ColumnProperty] = 0       
                     },
-                    new CheckBox()
+                    new ToggleSwitch()
                     {
                         IsChecked = (bool)setting.Value,
                         [!ToggleButton.IsCheckedProperty] = new Binding("Value", BindingMode.TwoWay),

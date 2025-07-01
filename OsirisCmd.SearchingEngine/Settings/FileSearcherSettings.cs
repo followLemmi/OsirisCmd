@@ -1,10 +1,15 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections;
+using System.Collections.ObjectModel;
 using OsirisCmd.SettingsManager;
 
 namespace OsirisCmd.SearchingEngine.Settings;
 
+
 public class FileSearcherSettings : ISettings
 {
+    /// <summary>
+    /// File Searcher settings structure and default values of settings
+    /// </summary>
     public ObservableCollection<SettingItem> Settings { get; set; } =
     [
         new()
@@ -72,6 +77,19 @@ public class FileSearcherSettings : ISettings
                                 "/.Spotlight-V100",
                                 "/.fseventsd",
                             }
+                        },
+                        new () {
+                            Name = "General",
+                            Value = new List<string>()
+                            {
+                                "node_modules",
+                                ".git",
+                                ".svn",
+                                ".hg",
+                                "__pycache__",
+                                ".gradle",
+                                ".idea",
+                            }
                         }
                     }
                 },
@@ -95,11 +113,100 @@ public class FileSearcherSettings : ISettings
                     Name = "FileNameOnly",
                     Value = new List<string>()
                     {
+                        // Archives
+                        ".zip",
+                        ".rar",
+                        ".7z",
+                        ".tar",
+                        ".gz",
+                        ".bz2",
+                        ".xz",
+                        ".cab",
+                        ".iso",
+                        ".img",
+                        ".dmg",
+                        ".vhd",
+                        ".vhdx",
+                        ".jar",
+                        ".war",
+
+                        // Binary
                         ".exe",
-                        ""
+                        ".dll",
+                        ".bin",
+                        ".msi",
+                        ".sys",
+                        ".ocx",
+                        ".so",
+                        ".deb",
+                        ".rpm",
+                        ".apk",
+                        ".com",
+                        ".out",
+                        ".o",
+                        ".a",
+
+                        // Media
+                        ".mp3",
+                        ".wav",
+                        ".flac",
+                        ".aac",
+                        ".ogg",
+                        ".m4a",
+                        ".mp4",
+                        ".avi",
+                        ".mkv",
+                        ".mov",
+                        ".webm",
+                        ".wmv",
+                        ".flv",
+
+                        // Images
+                        ".jpg",
+                        ".jpeg",
+                        ".png",
+                        ".bmp",
+                        ".gif",
+                        ".tiff",
+                        ".webp",
+                        ".svg",
+                        ".ico",
+                        ".heic",
+                        ".raw",
+                        ".nef",
+                        ".cr2",
+                        ".arw",
+
+                        // Modeling
+                        ".dwg",
+                        ".dxf",
+                        ".stl",
+                        ".obj",
+                        ".3ds",
+                        ".fbx",
+                        ".blend"
                     }
                 }
             }
         },
     ];
+
+    public List<string> GetAllDirectoriesToSkip()
+    {
+        var result = new List<string>();
+
+        var directoriesSettings = Settings.First(item => item.Name.Equals("DirectoriesSettings"));
+        if (directoriesSettings != null)
+        {
+            var directoriesToSkip = ((List<SettingItem>)directoriesSettings.Value).First(item => item.Name.Equals("SkipDirectories"));
+            ((List<SettingItem>) directoriesToSkip.Value).ForEach(item => 
+            {
+                ((List<string>)item.Value).ForEach(directory => result.Add(directory));
+            });
+            return result;
+        }
+        throw new Exception("Settings for directories not found");
+    }
+
+
 }

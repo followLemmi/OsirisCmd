@@ -3,88 +3,30 @@ using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
 using OsirisCmd.SearchingEngine.Components;
+using OsirisCmd.SearchingEngine.Settings;
 using OsirisCmd.SettingsManager;
 
 namespace OsirisCmd.SearchingEngine;
 
 public class FileSearcher
 {
-    private readonly global::OsirisCmd.SearchingEngine.SearchingEngine _searchingEngine;
+    private readonly SearchingEngine _searchingEngine;
     private readonly QueryParser _fileNameParser;
     private readonly QueryParser _fileContentParser;
     private readonly MultiFieldQueryParser _multiFieldParser;
-    
-    private static readonly HashSet<string> TextExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".txt", ".cs", ".js", ".html", ".htm", ".xml", ".json", ".css", ".sql", 
-        ".py", ".java", ".cpp", ".c", ".h", ".hpp", ".md", ".yml", ".yaml", 
-        ".ini", ".cfg", ".conf", ".log", ".csv", ".tsv", ".bat", ".sh", ".ps1",
-        ".xaml", ".csproj", ".sln", ".config", ".properties", ".dockerfile",
-        ".gitignore", ".gitattributes", ".editorconfig", ".proto", ".razor",
-        ".vue", ".ts", ".tsx", ".jsx", ".scss", ".less", ".sass", ".php",
-        ".rb", ".go", ".rs", ".kt", ".scala", ".swift", ".r", ".m", ".pl"
-    };
-    
-    private static readonly HashSet<string> BinaryExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".exe", ".dll", ".so", ".dylib", ".bin", ".dat", ".db", ".sqlite",
-        ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".deb", ".rpm",
-        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".ico", ".webp", ".svg", ".tiff",
-        ".mp3", ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".wav", ".flac",
-        ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".odt", ".ods",
-        ".class", ".jar", ".war", ".ear", ".pyc", ".o", ".obj", ".lib", ".a",
-        ".iso", ".img", ".dmg", ".msi", ".pkg", ".snap", ".flatpak", ".appimage"
-    };
-    
-    private static readonly HashSet<string> SkipDirectories = new(StringComparer.OrdinalIgnoreCase)
-    {
-        // Unix/Linux системные папки
-        "proc", "sys", "dev", "run", "tmp", "/var/tmp", "/var/cache",
-        "/var/spool", "/var/lock", "/var/run", "boot", "lost+found", "snap",
-    
-        // Папки пользователя Unix
-        ".cache", ".thumbnails", ".local/share/Trash",
-    
-        // Windows системные папки  
-        "System32", "SysWOW64", "WinSxS", "Temp", "Logs", 
-        "System Volume Information", "$Recycle.Bin", "Windows",
-    
-        // Папки разработки
-        "node_modules", ".git", ".svn", ".hg", "bin", "obj", 
-        "build", "dist", "out", ".vs", ".idea", "packages", 
-        "vendor", "__pycache__", ".pytest_cache", ".tox", "coverage", 
-        ".nyc_output", ".gradle", ".ivy2", ".sbt",
-    
-        // Дополнительные кэши и временные папки
-        "cache", "Cache", "tmp", "temp", "Temp", "logs", "Logs"
-    };
 
-    private static readonly HashSet<string> SkipPatterns = new(StringComparer.OrdinalIgnoreCase)
-    {
-        // Кэши браузеров
-        "mozilla", "chrome", "chromium", "firefox", "safari", "edge",
+    private readonly FileSearcherSettings? _settings;
     
-        // IDE и редакторы
-        "jetbrains", "intellij", "pycharm", "webstorm", "rider",
-    
-        // Системные папки
-        "system volume information", "windows.old", "programdata",
-    
-        // Snap пакеты
-        "snap"
-    };
-
     public FileSearcher(string indexStoragePath)
     {
         SettingsProvider.Instance.RegisterUIComponent("FileSearching", () => new FileSearcherSettingsComponent());
-        // var settings = SettingsProvider.Instance.AttachSettings<FileSearchingSettingsSection>("FileSearching");
-        _searchingEngine = new global::OsirisCmd.SearchingEngine.SearchingEngine(indexStoragePath);
+        _settings = SettingsProvider.Instance.AttachSettings<FileSearcherSettings>();
+        _searchingEngine = new SearchingEngine(indexStoragePath);
         // IndexFiles();
         var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);
-        _multiFieldParser = new MultiFieldQueryParser(LuceneVersion.LUCENE_48, 
-            new[] {"fileName", "content"}, analyzer);
+        _multiFieldParser = new MultiFieldQueryParser(LuceneVersion.LUCENE_48, ["fileName", "content"], analyzer);
     }
 
     public List<SearchResult> SearchByFileName(string fileName, int maxResults = 100)
@@ -256,19 +198,15 @@ public class FileSearcher
     }
 
     
+    //TODO: rewrite this logic
     private string GetFileContent(string filePath)
     {
         var extension = Path.GetExtension(filePath);
-        
-        // if (BinaryExtensions.Contains(extension))
-        // {
-        //     return "";
-        // }
 
-        if (TextExtensions.Contains(extension))
-        {
-            return ReadTextFileContent(filePath);
-        }
+        // if (TextExtensions.Contains(extension))
+        // {
+        //     return ReadTextFileContent(filePath);
+        // }
 
         if (string.IsNullOrEmpty(extension) || IsTextFile(filePath))
         {
@@ -338,41 +276,13 @@ public class FileSearcher
     {
         var dirName = Path.GetFileName(directoryPath);
         var fullPath = Path.GetFullPath(directoryPath);
-        
-        var unixSystemDirs = new[] { "/proc", "/sys", "/dev", "/run", "/tmp", "/var", "/snap", "/usr" };
-        if (unixSystemDirs.Any(sysDir => fullPath.StartsWith(sysDir + "/") || fullPath == sysDir))
+
+        if (_settings!.GetAllDirectoriesToSkip().Contains(dirName))
         {
             return true;
         }
         
-        if (SkipDirectories.Contains(dirName))
-        {
-            return true;
-        }
-        
-        if (dirName.StartsWith(".") && !IsImportantHiddenDirectory(dirName))
-        {
-            return true;
-        }
-        
-        if (dirName.Contains("cache", StringComparison.OrdinalIgnoreCase) ||
-            dirName.Contains("temp", StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-    
         return false;
     }
-
-    private static bool IsImportantHiddenDirectory(string dirName)
-    {
-        // Некоторые скрытые папки могут содержать полезные файлы
-        var importantHiddenDirs = new[] { 
-            ".config", ".local", ".ssh", ".bashrc", ".vimrc", 
-            ".profile", ".gitconfig", ".npmrc", ".dockerenv" 
-        };
-        return importantHiddenDirs.Contains(dirName, StringComparer.OrdinalIgnoreCase);
-    }
-
 
 }
