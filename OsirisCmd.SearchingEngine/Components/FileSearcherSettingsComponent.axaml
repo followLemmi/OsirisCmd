@@ -13,11 +13,13 @@
     </UserControl.DataContext>
 
     <DockPanel>
-        <ItemsControl ItemsSource="{Binding Settings.Settings}">
-            <ItemsControl.ItemTemplate>
-                <templates:FileSearcherSettingsTemplate/>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding Settings.Settings}">
+                <ItemsControl.ItemTemplate>
+                    <templates:FileSearcherSettingsTemplate/>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </DockPanel>
 
 </UserControl>

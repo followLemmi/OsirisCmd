@@ -19,6 +19,11 @@ public class FileSearcherSettings : ISettings
         },
         new()
         {
+            Name = "DrivesToIndex",
+            Value = GetDefaultDrivesToIndex()
+        },
+        new()
+        {
             Name = "DirectoriesSettings",
             Value = new List<SettingItem>()
             {
@@ -59,6 +64,10 @@ public class FileSearcherSettings : ISettings
                                 "C:\\ProgramData",
                                 "C:\\$Recycle.Bin",
                                 "C:\\System Volume Information",
+                                "Temp",
+                                "msys64",
+                                "Cache",
+                                "cache"
                             }
                         },
                         new ()
@@ -98,7 +107,10 @@ public class FileSearcherSettings : ISettings
                     Name = "FileNameOnly",
                     Value = new List<string>()
                     {
-                        "/dev"
+                        "/dev",
+                        "C:\\Program Files",
+                        "C:\\Program Files (x86)",
+                        "AppData"
                     }
                 }
             }
@@ -191,6 +203,25 @@ public class FileSearcherSettings : ISettings
         },
     ];
 
+    private static List<DriveToIndex> GetDefaultDrivesToIndex()
+    {
+        return DriveInfo.GetDrives().Select(drive => new DriveToIndex() { Name = drive.Name, Enabled = true, }).ToList();
+    }
+
+    public bool IsFileIndexingEnabled()
+    {
+        var fileIndexingEnabled = Settings.First(item => item.Name.Equals("FileIndexingEnabled"));
+        return (bool)fileIndexingEnabled.Value;
+    }
+
+    public List<DriveToIndex>? GetDrivesToIndex()
+    {
+        var drivesToIndex = Settings.First(item => item.Name.Equals("DrivesToIndex"));
+        if (drivesToIndex == null) throw new Exception("Settings for drives to index not found");
+        if (drivesToIndex.Value == null) throw new Exception("Settings for drives to index have no value");
+        return drivesToIndex.Value as List<DriveToIndex>;
+    }
+
     public List<string> GetAllDirectoriesToSkip()
     {
         var result = new List<string>();
@@ -206,6 +237,20 @@ public class FileSearcherSettings : ISettings
             return result;
         }
         throw new Exception("Settings for directories not found");
+    }
+
+    public List<string> GetFileNameOnlyFiles()
+    {
+        var result = new List<string>();
+        
+        var fileSettings = Settings.First(item => item.Name.Equals("FileSettings"));
+        if (fileSettings != null)
+        {
+            var fileNameOnly = ((List<SettingItem>)fileSettings.Value).First(item => item.Name.Equals("FileNameOnly"));
+            ((List<string>)fileNameOnly.Value).ForEach(item => result.Add(item));
+            return result;
+        }
+        throw new Exception("Settings for file name only not found");
     }
 
 

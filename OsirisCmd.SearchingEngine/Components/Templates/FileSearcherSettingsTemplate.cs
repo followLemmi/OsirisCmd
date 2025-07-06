@@ -4,10 +4,12 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using Lucene.Net.Util.Automaton;
 using OsirisCmd.Localization;
 using OsirisCmd.SearchingEngine.Converters;
+using OsirisCmd.SearchingEngine.Settings;
 using OsirisCmd.SettingsManager;
 using OsirisCmd.SettingsManager.Events;
 
@@ -46,6 +48,8 @@ public class FileSearcherSettingsTemplate : IDataTemplate
                     new ToggleSwitch()
                     {
                         IsChecked = (bool)setting.Value,
+                        OffContent = null,
+                        OnContent = null,
                         [!ToggleButton.IsCheckedProperty] = new Binding("Value", BindingMode.TwoWay),
                         VerticalAlignment = VerticalAlignment.Stretch,
                         HorizontalAlignment = HorizontalAlignment.Center,
@@ -89,6 +93,7 @@ public class FileSearcherSettingsTemplate : IDataTemplate
             List<SettingItem> s => new Expander()
             {
                 Header = setting.Name,
+                IsExpanded = true,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 Margin = new Thickness(0, 5, 0, 5),
                 Content = new ItemsControl()
@@ -96,6 +101,19 @@ public class FileSearcherSettingsTemplate : IDataTemplate
                     ItemsSource = s,
                     ItemTemplate = this,
                 }
+            },
+            List<DriveToIndex> s => new Expander()
+            {
+                Header = "Drives to index",
+                IsExpanded = true,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Margin = new Thickness(0, 5, 0, 5),
+                Content = new ItemsControl()
+                {
+                    ItemsSource = s,
+                    ItemTemplate = new DrivesToIndexTemplate(),
+                }
+                
             },
             _ => new TextBlock()
             {

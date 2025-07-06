@@ -22,11 +22,15 @@ public class FileSearcher
         SettingsProvider.Instance.RegisterUIComponent("FileSearching", () => new FileSearcherSettingsComponent());
         _settings = SettingsProvider.Instance.AttachSettings<FileSearcherSettings>();
         _searchingEngine = new SearchingEngine(indexStoragePath);
-        // IndexFiles();
         var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);
         _multiFieldParser = new MultiFieldQueryParser(LuceneVersion.LUCENE_48, ["fileName", "content"], analyzer);
+        
+        var startTimestamp = DateTime.Now;
+        IndexFiles();
+        var endTimestamp = DateTime.Now;
+        Console.WriteLine($"Indexing took {(endTimestamp - startTimestamp).TotalMinutes} minutes");
     }
 
     public List<SearchResult> SearchByFileName(string fileName, int maxResults = 100)
@@ -84,12 +88,16 @@ public class FileSearcher
     
     private void IndexFiles()
     {
-        var rootPath = "c://workspace";
-        Console.WriteLine($"Strat indexing in {rootPath}...");
+        
+        var drivesToIndex = GetDrivesToIndex();
         
         try
         {
-            IndexDirectory(rootPath);
+            foreach (var rootPath in drivesToIndex)
+            {
+                Console.WriteLine($"Indexing {rootPath}");
+                IndexDirectory(rootPath);
+            }
         }
         catch (Exception ex)
         {
@@ -98,6 +106,29 @@ public class FileSearcher
         
         _searchingEngine.Commit();
         Console.WriteLine("Indexing complete!");
+    }
+
+    private List<string> GetDrivesToIndex()
+    {
+        var rootDirectoriesToIndex = new List<string>();
+        var drives = DriveInfo.GetDrives();
+        foreach (var drive in drives)
+        {
+            var needToIndex = true;
+            foreach (var settingDrive in _settings?.GetDrivesToIndex()!)
+            {
+                if (settingDrive.Name.Equals(drive.Name, StringComparison.InvariantCultureIgnoreCase) && !settingDrive.Enabled)
+                {
+                    needToIndex = false;
+                }
+            }
+
+            if (needToIndex)
+            {
+                rootDirectoriesToIndex.Add(drive.RootDirectory.FullName);
+            }
+        }
+        return rootDirectoriesToIndex;
     }
 
     private void IndexDirectory(string directoryPath)
@@ -197,16 +228,16 @@ public class FileSearcher
         }
     }
 
-    
-    //TODO: rewrite this logic
     private string GetFileContent(string filePath)
     {
         var extension = Path.GetExtension(filePath);
+        
+        //TODO: check is this filePath in fileNameOnly directories
 
-        // if (TextExtensions.Contains(extension))
-        // {
-        //     return ReadTextFileContent(filePath);
-        // }
+        if (_settings!.GetFileNameOnlyFiles().Contains(extension))
+        {
+            return "";
+        }
 
         if (string.IsNullOrEmpty(extension) || IsTextFile(filePath))
         {
@@ -277,12 +308,7 @@ public class FileSearcher
         var dirName = Path.GetFileName(directoryPath);
         var fullPath = Path.GetFullPath(directoryPath);
 
-        if (_settings!.GetAllDirectoriesToSkip().Contains(dirName))
-        {
-            return true;
-        }
-        
-        return false;
+        return _settings!.GetAllDirectoriesToSkip().Contains(dirName) || _settings!.GetAllDirectoriesToSkip().Contains(fullPath);
     }
 
 }
