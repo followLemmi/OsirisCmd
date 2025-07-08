@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 using OsirisCmd.SettingsManager;
 
 namespace OsirisCmd.SearchingEngine.Settings;
@@ -39,20 +40,12 @@ public class FileSearcherSettings : ISettings
                             {
                                 "/proc",
                                 "/sys",
-                                "/run",
-                                "/bin",
-                                "/sbin",
-                                "/tmp",
+                                "/snap",
                                 "/boot",
-                                "/var/run",
-                                "/var/lock",
-                                "/var/tmp",
-                                "/var/log",
-                                "/var/spool",
-                                "/var/cache",
-                                "/lost+found",
-                                "/home/user/.cache",
-                                "/home/user/.thumbnails",
+                                "/bin/X11",
+                                "/usr/bin/X11",
+                                "/var/lib",
+                                "/dev"
                             }
                         },
                         new ()
@@ -61,13 +54,6 @@ public class FileSearcherSettings : ISettings
                             Value = new List<string>()
                             {
                                 "C:\\Windows",
-                                "C:\\ProgramData",
-                                "C:\\$Recycle.Bin",
-                                "C:\\System Volume Information",
-                                "Temp",
-                                "msys64",
-                                "Cache",
-                                "cache"
                             }
                         },
                         new ()
@@ -77,14 +63,6 @@ public class FileSearcherSettings : ISettings
                             {
                                 "/System",
                                 "/private",
-                                "/usr/local",
-                                "/usr/share",
-                                "/usr/lib",
-                                "/usr/bin",
-                                "/usr/sbin",
-                                "/.Trash",
-                                "/.Spotlight-V100",
-                                "/.fseventsd",
                             }
                         },
                         new () {
@@ -92,8 +70,6 @@ public class FileSearcherSettings : ISettings
                             Value = new List<string>()
                             {
                                 "node_modules",
-                                ".git",
-                                ".svn",
                                 ".hg",
                                 "__pycache__",
                                 ".gradle",
@@ -102,17 +78,6 @@ public class FileSearcherSettings : ISettings
                         }
                     }
                 },
-                new()
-                {
-                    Name = "FileNameOnly",
-                    Value = new List<string>()
-                    {
-                        "/dev",
-                        "C:\\Program Files",
-                        "C:\\Program Files (x86)",
-                        "AppData"
-                    }
-                }
             }
         },
         new()
@@ -120,91 +85,127 @@ public class FileSearcherSettings : ISettings
             Name = "FileSettings",
             Value = new List<SettingItem>()
             {
-                new()
+            //     new()
+            //     {
+            //         Name = "FileNameOnly",
+            //         Value = new List<string>()
+            //         {
+            //             // Archives
+            //             ".zip",
+            //             ".rar",
+            //             ".7z",
+            //             ".tar",
+            //             ".gz",
+            //             ".bz2",
+            //             ".xz",
+            //             ".cab",
+            //             ".iso",
+            //             ".img",
+            //             ".dmg",
+            //             ".vhd",
+            //             ".vhdx",
+            //             ".jar",
+            //             ".war",
+            //
+            //             // Binary
+            //             ".exe",
+            //             ".dll",
+            //             ".bin",
+            //             ".msi",
+            //             ".sys",
+            //             ".ocx",
+            //             ".so",
+            //             ".deb",
+            //             ".rpm",
+            //             ".apk",
+            //             ".com",
+            //             ".out",
+            //             ".o",
+            //             ".a",
+            //
+            //             // Media
+            //             ".mp3",
+            //             ".wav",
+            //             ".flac",
+            //             ".aac",
+            //             ".ogg",
+            //             ".m4a",
+            //             ".mp4",
+            //             ".avi",
+            //             ".mkv",
+            //             ".mov",
+            //             ".webm",
+            //             ".wmv",
+            //             ".flv",
+            //
+            //             // Images
+            //             ".jpg",
+            //             ".jpeg",
+            //             ".png",
+            //             ".bmp",
+            //             ".gif",
+            //             ".tiff",
+            //             ".webp",
+            //             ".svg",
+            //             ".ico",
+            //             ".heic",
+            //             ".raw",
+            //             ".nef",
+            //             ".cr2",
+            //             ".arw",
+            //
+            //             // Modeling
+            //             ".dwg",
+            //             ".dxf",
+            //             ".stl",
+            //             ".obj",
+            //             ".3ds",
+            //             ".fbx",
+            //             ".blend"
+            //         }
+            //     }
+            new()
+            {
+                Name = "ReadContentExtensions",
+                Value = new List<string>()
                 {
-                    Name = "FileNameOnly",
-                    Value = new List<string>()
-                    {
-                        // Archives
-                        ".zip",
-                        ".rar",
-                        ".7z",
-                        ".tar",
-                        ".gz",
-                        ".bz2",
-                        ".xz",
-                        ".cab",
-                        ".iso",
-                        ".img",
-                        ".dmg",
-                        ".vhd",
-                        ".vhdx",
-                        ".jar",
-                        ".war",
-
-                        // Binary
-                        ".exe",
-                        ".dll",
-                        ".bin",
-                        ".msi",
-                        ".sys",
-                        ".ocx",
-                        ".so",
-                        ".deb",
-                        ".rpm",
-                        ".apk",
-                        ".com",
-                        ".out",
-                        ".o",
-                        ".a",
-
-                        // Media
-                        ".mp3",
-                        ".wav",
-                        ".flac",
-                        ".aac",
-                        ".ogg",
-                        ".m4a",
-                        ".mp4",
-                        ".avi",
-                        ".mkv",
-                        ".mov",
-                        ".webm",
-                        ".wmv",
-                        ".flv",
-
-                        // Images
-                        ".jpg",
-                        ".jpeg",
-                        ".png",
-                        ".bmp",
-                        ".gif",
-                        ".tiff",
-                        ".webp",
-                        ".svg",
-                        ".ico",
-                        ".heic",
-                        ".raw",
-                        ".nef",
-                        ".cr2",
-                        ".arw",
-
-                        // Modeling
-                        ".dwg",
-                        ".dxf",
-                        ".stl",
-                        ".obj",
-                        ".3ds",
-                        ".fbx",
-                        ".blend"
-                    }
+                    ".txt", ".md", ".rst", ".log", ".csv", ".tsv",
+                    
+                    ".ini", ".conf", ".properties", ".env",
+                    
+                    ".c", ".h", ".cpp", ".cc", ".cxx", ".hpp", ".hxx", ".cs", ".java", ".py",
+                    ".js", ".ts", ".rb", ".go", ".rs", ".php", ".swift", ".kt", ".kts", ".dart",
+                    ".m", ".mm", ".scala", ".hs", ".lua", ".pl", ".r", ".jl", ".groovy", ".clj",
+                    ".sql", ".asm", ".s",
+                    
+                    ".html", ".htm", ".xhtml", ".css", ".scss", ".sass", ".less", ".vue",
+                    ".jsx", ".tsx",
+                    
+                    ".sh", ".bash", ".zsh", ".fish", ".ps1", ".bat", ".cmd", ".make",
+                    ".gradle", ".pom",
+                    
+                    ".feature", ".spec.js", ".test.js", ".robot", ".doctest", ".story"
                 }
+            },
+            new()
+            {
+                Name = "ReadContentFiles",
+                Value = new List<string>()
+                {
+                    "Dockerfile",
+                    "Makefile"
+                }
+            }
             }
         },
     ];
 
-    private static List<DriveToIndex> GetDefaultDrivesToIndex()
+    private static List<DriveToIndex>? GetDefaultDrivesToIndex()
     {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return [];
+        }
         return DriveInfo.GetDrives().Select(drive => new DriveToIndex() { Name = drive.Name, Enabled = true, }).ToList();
     }
 
@@ -221,7 +222,7 @@ public class FileSearcherSettings : ISettings
         if (drivesToIndex.Value == null) throw new Exception("Settings for drives to index have no value");
         return drivesToIndex.Value as List<DriveToIndex>;
     }
-
+    
     public List<string> GetAllDirectoriesToSkip()
     {
         var result = new List<string>();
@@ -239,19 +240,31 @@ public class FileSearcherSettings : ISettings
         throw new Exception("Settings for directories not found");
     }
 
-    public List<string> GetFileNameOnlyFiles()
+    public List<string> GetReadContentExtensions()
     {
         var result = new List<string>();
         
         var fileSettings = Settings.First(item => item.Name.Equals("FileSettings"));
         if (fileSettings != null)
         {
-            var fileNameOnly = ((List<SettingItem>)fileSettings.Value).First(item => item.Name.Equals("FileNameOnly"));
+            var fileNameOnly = ((List<SettingItem>)fileSettings.Value).First(item => item.Name.Equals("ReadContentExtensions"));
             ((List<string>)fileNameOnly.Value).ForEach(item => result.Add(item));
             return result;
         }
         throw new Exception("Settings for file name only not found");
     }
 
-
+    public List<string> GetReadContentFiles()
+    {
+        var result = new List<string>();
+        
+        var fileSettings = Settings.First(item => item.Name.Equals("FileSettings"));
+        if (fileSettings != null)
+        {
+            var fileNameOnly = ((List<SettingItem>)fileSettings.Value).First(item => item.Name.Equals("ReadContentFiles"));
+            ((List<string>)fileNameOnly.Value).ForEach(item => result.Add(item));
+            return result;
+        }
+        throw new Exception("Settings for file name only not found");
+    }
 }

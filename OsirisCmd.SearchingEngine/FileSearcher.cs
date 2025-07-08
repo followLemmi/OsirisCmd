@@ -174,7 +174,7 @@ public class FileSearcher
             
             try
             {
-                var subdirectories = Directory.EnumerateDirectories(directoryPath);
+                var subdirectories = Directory.EnumerateDirectories(directoryPath, "*", SearchOption.AllDirectories);
                 foreach (var subdirectory in subdirectories)
                 {
                     IndexDirectory(subdirectory);
@@ -230,11 +230,12 @@ public class FileSearcher
 
     private string GetFileContent(string filePath)
     {
+        var fileName = Path.GetFileName(filePath);
         var extension = Path.GetExtension(filePath);
         
         //TODO: check is this filePath in fileNameOnly directories
 
-        if (_settings!.GetFileNameOnlyFiles().Contains(extension))
+        if (!_settings!.GetReadContentExtensions().Contains(extension) || !_settings.GetReadContentFiles().Contains(fileName))
         {
             return "";
         }
@@ -308,7 +309,7 @@ public class FileSearcher
         var dirName = Path.GetFileName(directoryPath);
         var fullPath = Path.GetFullPath(directoryPath);
 
-        return _settings!.GetAllDirectoriesToSkip().Contains(dirName) || _settings!.GetAllDirectoriesToSkip().Contains(fullPath);
+        return _settings!.GetAllDirectoriesToSkip().Any(value => fullPath.Contains(value));
     }
 
 }
