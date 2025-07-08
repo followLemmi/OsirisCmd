@@ -14,6 +14,8 @@ public class FileSearcher
     private readonly QueryParser _fileNameParser;
     private readonly QueryParser _fileContentParser;
     private readonly MultiFieldQueryParser _multiFieldParser;
+    private object _lock = new object();
+    private List<Task> _tasks = new List<Task>();
 
     private readonly FileSearcherSettings? _settings;
     
@@ -26,7 +28,12 @@ public class FileSearcher
         _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);
         _multiFieldParser = new MultiFieldQueryParser(LuceneVersion.LUCENE_48, ["fileName", "content"], analyzer);
-        
+
+        // var result = SearchByFileName("WindowsBase.dll");
+        // foreach (var searchResult in result)
+        // {
+        //     Console.WriteLine(searchResult.ToString());
+        // }
         var startTimestamp = DateTime.Now;
         IndexFiles();
         var endTimestamp = DateTime.Now;
@@ -90,19 +97,22 @@ public class FileSearcher
     {
         
         var drivesToIndex = GetDrivesToIndex();
-        
+        var allTasks = new List<Task>();
         try
         {
             foreach (var rootPath in drivesToIndex)
             {
                 Console.WriteLine($"Indexing {rootPath}");
-                IndexDirectory(rootPath);
+                var rootTask = IndexDirectory(rootPath);
+                allTasks.AddRange(rootTask);
             }
+            Task.WaitAll(allTasks.ToArray());
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error while indexing: {ex.Message}");
         }
+
         
         _searchingEngine.Commit();
         Console.WriteLine("Indexing complete!");
@@ -131,20 +141,21 @@ public class FileSearcher
         return rootDirectoriesToIndex;
     }
 
-    private void IndexDirectory(string directoryPath)
+    private List<Task> IndexDirectory(string directoryPath)
     {
+        var tasks = new List<Task>();
         try
         {
             if (ShouldSkipDirectory(directoryPath))
             {
                 Console.WriteLine($"Skip directory: {directoryPath}");
-                return;
+                return tasks;
             }
             
             if (!HasDirectoryAccess(directoryPath))
             {
                 Console.WriteLine($"No permission to directory: {directoryPath}");
-                return;
+                return tasks;
             }
             
             try
@@ -169,15 +180,20 @@ public class FileSearcher
             catch (UnauthorizedAccessException)
             {
                 Console.WriteLine($"No permission to directory: {directoryPath}");
-                return;
+                return tasks;
             }
             
             try
             {
-                var subdirectories = Directory.EnumerateDirectories(directoryPath, "*", SearchOption.AllDirectories);
+                var subdirectories = Directory.EnumerateDirectories(directoryPath);
                 foreach (var subdirectory in subdirectories)
                 {
-                    IndexDirectory(subdirectory);
+                    var task = Task.Run(() =>
+                    {
+                        var subtasks = IndexDirectory(subdirectory);
+                        Task.WaitAll(subtasks.ToArray());
+                    });
+                    tasks.Add(task);
                 }
             }
             catch (UnauthorizedAccessException)
@@ -189,6 +205,7 @@ public class FileSearcher
         {
             Console.WriteLine($"Error while processing directory {directoryPath}: {ex.Message}");
         }
+        return tasks;
     }
 
     private void IndexSingleFile(string file)
@@ -203,8 +220,12 @@ public class FileSearcher
         Console.WriteLine($"Indexing {file}");
         
         var content = GetFileContent(file);
-        
-        _searchingEngine.IndexFile(file, content);
+
+        lock (_lock)
+        {
+            _searchingEngine.IndexFile(file, content);
+        }
+
     }
 
     private static bool HasDirectoryAccess(string directoryPath)

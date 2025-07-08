@@ -53,7 +53,8 @@ public class FileSearcherSettings : ISettings
                             Name = "Windows",
                             Value = new List<string>()
                             {
-                                "C:\\Windows",
+                                "\\$Recycle.Bin",
+                                "\\ProgrammData",
                             }
                         },
                         new ()
