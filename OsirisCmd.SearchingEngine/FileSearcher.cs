@@ -5,6 +5,7 @@ using Lucene.Net.Util;
 using OsirisCmd.SearchingEngine.Components;
 using OsirisCmd.SearchingEngine.Settings;
 using OsirisCmd.SettingsManager;
+using Serilog;
 
 namespace OsirisCmd.SearchingEngine;
 
@@ -14,8 +15,6 @@ public class FileSearcher
     private readonly QueryParser _fileNameParser;
     private readonly QueryParser _fileContentParser;
     private readonly MultiFieldQueryParser _multiFieldParser;
-    private object _lock = new object();
-    private List<Task> _tasks = new List<Task>();
 
     private readonly FileSearcherSettings? _settings;
     
@@ -29,11 +28,6 @@ public class FileSearcher
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);
         _multiFieldParser = new MultiFieldQueryParser(LuceneVersion.LUCENE_48, ["fileName", "content"], analyzer);
 
-        // var result = SearchByFileName("settings.xml");
-        // foreach (var searchResult in result)
-        // {
-        //     Console.WriteLine(searchResult.ToString());
-        // }
         var startTimestamp = DateTime.Now;
         IndexFiles();
         var endTimestamp = DateTime.Now;
@@ -94,53 +88,50 @@ public class FileSearcher
     }
     
     
-    private void IndexFiles()
+    private async void IndexFiles()
     {
-        
-        var drivesToIndex = GetDrivesToIndex();
-        var allFiles = new List<string>();
         try
         {
-            foreach (var rootPath in drivesToIndex)
+            var tasks = new List<Task>();
+            var drivesToIndex = GetDrivesToIndex();
+            var allFiles = new List<string>();
+            try
             {
-                allFiles.AddRange(GetAllFilesRecursive(rootPath));
+                foreach (var rootPath in drivesToIndex)
+                {
+                    tasks.Add(Task.Run(() =>
+                    {
+                        allFiles.AddRange(GetAllFilesRecursive(rootPath));
+                    }));
+                }
+            
+                await Task.WhenAll(tasks);
+            
+                const int batchSize = 1000;
+                var batches = allFiles
+                    .Select((file, index) => new { file, index })
+                    .GroupBy(x => x.index / batchSize)
+                    .Select(g => g.Select(x => x.file).ToList())
+                    .ToList();
+            
+                tasks = batches.Select(batch => Task.Run(() => IndexFilesBatch(batch))).ToList();
+                await Task.WhenAll(tasks);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while indexing: {ex.Message}");
             }
 
-            // allFiles.AddRange(GetAllFilesRecursive("C:\\workspace\\jvl"));
-            
-            
-            const int batchSize = 1000;
-            var batches = allFiles
-                .Select((file, index) => new { file, index })
-                .GroupBy(x => x.index / batchSize)
-                .Select(g => g.Select(x => x.file).ToList())
-                .ToList();
-            
-            var parallelOptions = new ParallelOptions()
+            await Task.Run(() =>
             {
-                MaxDegreeOfParallelism = 128
-            };
-            Parallel.ForEach(batches, parallelOptions, batch =>
-            {
-                try
-                {
-                    IndexFilesBatch(batch);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
+                _searchingEngine.Commit();
+                Console.WriteLine("Indexing complete!");
             });
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error while indexing: {ex.Message}");
+            Log.Error(e, "Error while indexing");
         }
-
-        
-        _searchingEngine.Commit();
-        Console.WriteLine("Indexing complete!");
     }
 
     private List<string> GetDrivesToIndex()
@@ -191,83 +182,13 @@ public class FileSearcher
         return allFiles;
     }
 
-    private void IndexDirectory(string directoryPath)
-    {
-        var allTasks = new List<Task>();
-        try
-        {
-            if (ShouldSkipDirectory(directoryPath))
-            {
-                Console.WriteLine($"Skip directory: {directoryPath}");
-                return;
-            }
-            
-            if (!HasDirectoryAccess(directoryPath))
-            {
-                Console.WriteLine($"No permission to directory: {directoryPath}");
-                return;
-            }
-            
-            try
-            {
-                var fileTask = Task.Run(() =>
-                {
-                    var files = Directory.EnumerateFiles(directoryPath);
-                    foreach (var file in files)
-                    {
-                        try
-                        {
-                            IndexSingleFile(file);
-                        }
-                        catch (UnauthorizedAccessException)
-                        {
-                            Console.WriteLine($"No permission to file: {file}");
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Error indexing {file}: {ex.Message}");
-                        }
-                    }
-                });
-                allTasks.Add(fileTask);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                Console.WriteLine($"No permission to directory: {directoryPath}");
-                return;
-            }
-
-            try
-            {
-                var subdirectories = Directory.EnumerateDirectories(directoryPath);
-                foreach (var subdirectory in subdirectories)
-                {
-                    var task = Task.Run(() => IndexDirectory(subdirectory));
-                    allTasks.Add(task);
-                }
-                // Task.WaitAll(allTasks.ToArray());
-            }
-            catch (UnauthorizedAccessException)
-            {
-                Console.WriteLine($"No permission to directory: {directoryPath}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error while processing directory {directoryPath}: {ex.Message}");
-        }
-    }
-
     private void IndexFilesBatch(List<string> files)
     {
-        var parralelOption = new ParallelOptions()
+        var parallelOption = new ParallelOptions()
         {
             MaxDegreeOfParallelism = 128
         };
-        Parallel.ForEach(files, parralelOption, file =>
-        {
-            IndexSingleFile(file);
-        });
+        Parallel.ForEach(files, parallelOption, IndexSingleFile);
     }
 
     private void IndexSingleFile(string file)
@@ -277,11 +198,6 @@ public class FileSearcher
         {
             return;
         }
-
-        // if (_searchingEngine.IsFileIndexed(file, fileInfo.LastWriteTime))
-        // {
-        //     return;
-        // }
         
         Console.WriteLine($"Indexing {file}");
         
@@ -317,8 +233,6 @@ public class FileSearcher
         var fileName = Path.GetFileName(filePath);
         var extension = Path.GetExtension(filePath);
         
-        //TODO: check is this filePath in fileNameOnly directories
-
         if (!_settings!.GetReadContentExtensions().Contains(extension) || !_settings.GetReadContentFiles().Contains(fileName))
         {
             return "";
@@ -332,7 +246,7 @@ public class FileSearcher
         return "";
     }
     
-    private string ReadTextFileContent(string filePath)
+    private static string ReadTextFileContent(string filePath)
     {
         try
         {
@@ -345,23 +259,23 @@ public class FileSearcher
         }
     }
     
-    private bool IsTextFile(string filePath, int sampleSize = 512)
+    private static bool IsTextFile(string filePath, int sampleSize = 512)
     {
         try
         {
             using var fileStream = File.OpenRead(filePath);
             var buffer = new byte[Math.Min(sampleSize, (int)fileStream.Length)];
-            int bytesRead = fileStream.Read(buffer, 0, buffer.Length);
+            var bytesRead = fileStream.Read(buffer, 0, buffer.Length);
             
             if (bytesRead == 0) return true;
             
-            for (int i = 0; i < bytesRead; i++)
+            for (var i = 0; i < bytesRead; i++)
             {
                 if (buffer[i] == 0) return false;
             }
             
-            int printableCount = 0;
-            for (int i = 0; i < bytesRead; i++)
+            var printableCount = 0;
+            for (var i = 0; i < bytesRead; i++)
             {
                 byte b = buffer[i];
                 if (IsPrintableOrWhitespace(b))
@@ -370,7 +284,7 @@ public class FileSearcher
                 }
             }
             
-            double printableRatio = (double)printableCount / bytesRead;
+            var printableRatio = (double)printableCount / bytesRead;
             return printableRatio >= 0.95;
         }
         catch
@@ -390,9 +304,7 @@ public class FileSearcher
 
     private bool ShouldSkipDirectory(string directoryPath)
     {
-        var dirName = Path.GetFileName(directoryPath);
         var fullPath = Path.GetFullPath(directoryPath);
-
         return _settings!.GetAllDirectoriesToSkip().Any(value => fullPath.Contains(value));
     }
 

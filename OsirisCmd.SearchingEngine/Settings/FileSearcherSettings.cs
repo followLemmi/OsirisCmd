@@ -70,13 +70,13 @@ public class FileSearcherSettings : ISettings
                             Name = "General",
                             Value = new List<string>()
                             {
-                                // "node_modules",
+                                "node_modules",
                                 ".hg",
                                 "__pycache__",
                                 ".gradle",
                                 ".idea",
-                                // ".git",
-                                // ".svn"
+                                ".git",
+                                ".svn"
                             }
                         }
                     }
