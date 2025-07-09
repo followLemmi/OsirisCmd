@@ -27,6 +27,11 @@ public class SearchingEngine
     {
         var document = new Document();
         var fileInfo = new FileInfo(filePath);
+
+        if (!fileInfo.Exists)
+        {
+            return;
+        }
         
         document.Add(new StringField("fullPath", filePath, Field.Store.YES));
         document.Add(new TextField("fileName", fileInfo.Name, Field.Store.YES));

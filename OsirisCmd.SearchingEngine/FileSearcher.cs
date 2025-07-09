@@ -29,7 +29,7 @@ public class FileSearcher
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);
         _multiFieldParser = new MultiFieldQueryParser(LuceneVersion.LUCENE_48, ["fileName", "content"], analyzer);
 
-        // var result = SearchByFileName("WindowsBase.dll");
+        // var result = SearchByFileName("settings.xml");
         // foreach (var searchResult in result)
         // {
         //     Console.WriteLine(searchResult.ToString());
@@ -93,20 +93,45 @@ public class FileSearcher
         return results.OrderByDescending(x => x.Score).ToList();
     }
     
+    
     private void IndexFiles()
     {
         
         var drivesToIndex = GetDrivesToIndex();
-        var allTasks = new List<Task>();
+        var allFiles = new List<string>();
         try
         {
             foreach (var rootPath in drivesToIndex)
             {
-                Console.WriteLine($"Indexing {rootPath}");
-                var rootTask = IndexDirectory(rootPath);
-                allTasks.AddRange(rootTask);
+                allFiles.AddRange(GetAllFilesRecursive(rootPath));
             }
-            Task.WaitAll(allTasks.ToArray());
+
+            // allFiles.AddRange(GetAllFilesRecursive("C:\\workspace\\jvl"));
+            
+            
+            const int batchSize = 1000;
+            var batches = allFiles
+                .Select((file, index) => new { file, index })
+                .GroupBy(x => x.index / batchSize)
+                .Select(g => g.Select(x => x.file).ToList())
+                .ToList();
+            
+            var parallelOptions = new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = 128
+            };
+            Parallel.ForEach(batches, parallelOptions, batch =>
+            {
+                try
+                {
+                    IndexFilesBatch(batch);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
+            });
         }
         catch (Exception ex)
         {
@@ -141,60 +166,86 @@ public class FileSearcher
         return rootDirectoriesToIndex;
     }
 
-    private List<Task> IndexDirectory(string directoryPath)
+    private List<string> GetAllFilesRecursive(string directoryPath)
     {
-        var tasks = new List<Task>();
+        var allFiles = new List<string>();
+        var queue = new Queue<string>();
+        queue.Enqueue(directoryPath);
+        while (queue.Count > 0)
+        {
+            var currentDirectory = queue.Dequeue();
+            if (ShouldSkipDirectory(currentDirectory) || !HasDirectoryAccess(currentDirectory))
+            {
+                continue;
+            }
+            
+            var files = Directory.EnumerateFiles(currentDirectory);
+            allFiles.AddRange(files);
+            
+            var subdirectories = Directory.EnumerateDirectories(currentDirectory);
+            foreach (var subdirectory in subdirectories)
+            {
+                queue.Enqueue(subdirectory);
+            }
+        }
+        return allFiles;
+    }
+
+    private void IndexDirectory(string directoryPath)
+    {
+        var allTasks = new List<Task>();
         try
         {
             if (ShouldSkipDirectory(directoryPath))
             {
                 Console.WriteLine($"Skip directory: {directoryPath}");
-                return tasks;
+                return;
             }
             
             if (!HasDirectoryAccess(directoryPath))
             {
                 Console.WriteLine($"No permission to directory: {directoryPath}");
-                return tasks;
+                return;
             }
             
             try
             {
-                var files = Directory.EnumerateFiles(directoryPath);
-                foreach (var file in files)
+                var fileTask = Task.Run(() =>
                 {
-                    try
+                    var files = Directory.EnumerateFiles(directoryPath);
+                    foreach (var file in files)
                     {
-                        IndexSingleFile(file);
+                        try
+                        {
+                            IndexSingleFile(file);
+                        }
+                        catch (UnauthorizedAccessException)
+                        {
+                            Console.WriteLine($"No permission to file: {file}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error indexing {file}: {ex.Message}");
+                        }
                     }
-                    catch (UnauthorizedAccessException)
-                    {
-                        Console.WriteLine($"No permission to file: {file}");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error indexing {file}: {ex.Message}");
-                    }
-                }
+                });
+                allTasks.Add(fileTask);
             }
             catch (UnauthorizedAccessException)
             {
                 Console.WriteLine($"No permission to directory: {directoryPath}");
-                return tasks;
+                return;
             }
-            
+
             try
             {
                 var subdirectories = Directory.EnumerateDirectories(directoryPath);
                 foreach (var subdirectory in subdirectories)
                 {
-                    var task = Task.Run(() =>
-                    {
-                        var subtasks = IndexDirectory(subdirectory);
-                        Task.WaitAll(subtasks.ToArray());
-                    });
-                    tasks.Add(task);
+                    var task = Task.Run(() => IndexDirectory(subdirectory));
+                    allTasks.Add(task);
                 }
+                // Task.WaitAll(allTasks.ToArray());
             }
             catch (UnauthorizedAccessException)
             {
@@ -205,26 +256,38 @@ public class FileSearcher
         {
             Console.WriteLine($"Error while processing directory {directoryPath}: {ex.Message}");
         }
-        return tasks;
+    }
+
+    private void IndexFilesBatch(List<string> files)
+    {
+        var parralelOption = new ParallelOptions()
+        {
+            MaxDegreeOfParallelism = 128
+        };
+        Parallel.ForEach(files, parralelOption, file =>
+        {
+            IndexSingleFile(file);
+        });
     }
 
     private void IndexSingleFile(string file)
     {
         var fileInfo = new FileInfo(file);
-
-        if (_searchingEngine.IsFileIndexed(file, fileInfo.LastWriteTime))
+        if (!fileInfo.Exists)
         {
             return;
         }
+
+        // if (_searchingEngine.IsFileIndexed(file, fileInfo.LastWriteTime))
+        // {
+        //     return;
+        // }
         
         Console.WriteLine($"Indexing {file}");
         
         var content = GetFileContent(file);
 
-        lock (_lock)
-        {
-            _searchingEngine.IndexFile(file, content);
-        }
+        _searchingEngine.IndexFile(file, content);
 
     }
 
