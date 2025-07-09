@@ -29,6 +29,10 @@ public class SettingsItemConverter : JsonConverter<SettingItem>
 
     public override void Write(Utf8JsonWriter writer, SettingItem value, JsonSerializerOptions options)
     {
+        if (value == null)
+        {
+            return;
+        }
         writer.WriteStartObject();
         writer.WriteString("Name", value.Name);
         writer.WriteString("Type", value.Value.GetType().AssemblyQualifiedName ?? value.Type);

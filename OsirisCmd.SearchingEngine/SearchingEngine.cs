@@ -15,6 +15,7 @@ public class SearchingEngine
     private IndexWriter _indexWriter;
     private DirectoryReader? _directoryReader;
     private IndexSearcher? _indexSearcher;
+    private List<FileInfo> _files = [];
 
     public SearchingEngine(string indexPath)
     {
@@ -27,6 +28,11 @@ public class SearchingEngine
     {
         var document = new Document();
         var fileInfo = new FileInfo(filePath);
+
+        if (!fileInfo.Exists)
+        {
+            return;
+        }
         
         document.Add(new StringField("fullPath", filePath, Field.Store.YES));
         document.Add(new TextField("fileName", fileInfo.Name, Field.Store.YES));
@@ -44,24 +50,6 @@ public class SearchingEngine
         
         var term = new Term("fullPath", filePath);
         _indexWriter.UpdateDocument(term, document);
-    }
-
-    public bool IsFileIndexed(string filePath, DateTime lastModified)
-    {
-        var searcher = GetSearcher();
-        if (searcher == null)
-        {
-            return false;
-        }
-        var query = new TermQuery(new Term("fullPath", filePath));
-        var topDocs = searcher.Search(query, 1);
-        if (topDocs.TotalHits == 0)
-        {
-            return false;
-        }
-        var doc = searcher.Doc(topDocs.ScoreDocs[0].Doc);
-        var lastModifiedFromIndex = new DateTime(long.Parse(doc.Get("lastModified") ?? "0"));
-        return lastModifiedFromIndex >= lastModified;
     }
 
     public bool IsIndexEmpty()

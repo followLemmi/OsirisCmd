@@ -6,14 +6,14 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Application.Views.SettingsWindow"
         Title="SettingsWindow"
-        Width="600" Height="400"
+        Width="1024" Height="780"
         x:DataType="viewModels:SettingsWindowViewModel">
 
     <Window.DataContext>
         <viewModels:SettingsWindowViewModel />
     </Window.DataContext>
 
-    <TabControl TabStripPlacement="Left" ItemsSource="{Binding Tabs}">   
+    <TabControl TabStripPlacement="Left" ItemsSource="{Binding Tabs}">
     </TabControl>
 
 </Window>

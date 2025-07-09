@@ -1,4 +1,5 @@
 ﻿using OsirisCmd.SearchingEngine;
+using OsirisCmd.SettingsManager;
 using Xunit.Abstractions;
 
 namespace OsirisCmd.Tests;
@@ -15,6 +16,7 @@ public class UnitTest1
     [Fact]
     public void Test1()
     {
+        SettingsProvider.Initialize();
         var startTimestamp = DateTime.Now;
         var fileSearcher = new FileSearcher("./indexes");
         var result = fileSearcher.SearchByFileContent("Aft");

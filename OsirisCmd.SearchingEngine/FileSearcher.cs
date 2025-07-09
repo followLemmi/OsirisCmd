@@ -3,88 +3,35 @@ using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
 using OsirisCmd.SearchingEngine.Components;
+using OsirisCmd.SearchingEngine.Settings;
 using OsirisCmd.SettingsManager;
+using Serilog;
 
 namespace OsirisCmd.SearchingEngine;
 
 public class FileSearcher
 {
-    private readonly global::OsirisCmd.SearchingEngine.SearchingEngine _searchingEngine;
+    private readonly SearchingEngine _searchingEngine;
     private readonly QueryParser _fileNameParser;
     private readonly QueryParser _fileContentParser;
     private readonly MultiFieldQueryParser _multiFieldParser;
-    
-    private static readonly HashSet<string> TextExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".txt", ".cs", ".js", ".html", ".htm", ".xml", ".json", ".css", ".sql", 
-        ".py", ".java", ".cpp", ".c", ".h", ".hpp", ".md", ".yml", ".yaml", 
-        ".ini", ".cfg", ".conf", ".log", ".csv", ".tsv", ".bat", ".sh", ".ps1",
-        ".xaml", ".csproj", ".sln", ".config", ".properties", ".dockerfile",
-        ".gitignore", ".gitattributes", ".editorconfig", ".proto", ".razor",
-        ".vue", ".ts", ".tsx", ".jsx", ".scss", ".less", ".sass", ".php",
-        ".rb", ".go", ".rs", ".kt", ".scala", ".swift", ".r", ".m", ".pl"
-    };
-    
-    private static readonly HashSet<string> BinaryExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".exe", ".dll", ".so", ".dylib", ".bin", ".dat", ".db", ".sqlite",
-        ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".deb", ".rpm",
-        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".ico", ".webp", ".svg", ".tiff",
-        ".mp3", ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".wav", ".flac",
-        ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".odt", ".ods",
-        ".class", ".jar", ".war", ".ear", ".pyc", ".o", ".obj", ".lib", ".a",
-        ".iso", ".img", ".dmg", ".msi", ".pkg", ".snap", ".flatpak", ".appimage"
-    };
-    
-    private static readonly HashSet<string> SkipDirectories = new(StringComparer.OrdinalIgnoreCase)
-    {
-        // Unix/Linux системные папки
-        "proc", "sys", "dev", "run", "tmp", "/var/tmp", "/var/cache",
-        "/var/spool", "/var/lock", "/var/run", "boot", "lost+found", "snap",
-    
-        // Папки пользователя Unix
-        ".cache", ".thumbnails", ".local/share/Trash",
-    
-        // Windows системные папки  
-        "System32", "SysWOW64", "WinSxS", "Temp", "Logs", 
-        "System Volume Information", "$Recycle.Bin", "Windows",
-    
-        // Папки разработки
-        "node_modules", ".git", ".svn", ".hg", "bin", "obj", 
-        "build", "dist", "out", ".vs", ".idea", "packages", 
-        "vendor", "__pycache__", ".pytest_cache", ".tox", "coverage", 
-        ".nyc_output", ".gradle", ".ivy2", ".sbt",
-    
-        // Дополнительные кэши и временные папки
-        "cache", "Cache", "tmp", "temp", "Temp", "logs", "Logs"
-    };
 
-    private static readonly HashSet<string> SkipPatterns = new(StringComparer.OrdinalIgnoreCase)
-    {
-        // Кэши браузеров
-        "mozilla", "chrome", "chromium", "firefox", "safari", "edge",
+    private readonly FileSearcherSettings? _settings;
     
-        // IDE и редакторы
-        "jetbrains", "intellij", "pycharm", "webstorm", "rider",
-    
-        // Системные папки
-        "system volume information", "windows.old", "programdata",
-    
-        // Snap пакеты
-        "snap"
-    };
-
     public FileSearcher(string indexStoragePath)
     {
-        SettingsProvider.Instance.RegisterUI("FileSearching", () => new FileSearcherSettingsComponent());
-        // var settings = SettingsProvider.Instance.AttachSettings<FileSearchingSettingsSection>("FileSearching");
-        _searchingEngine = new global::OsirisCmd.SearchingEngine.SearchingEngine(indexStoragePath);
-        // IndexFiles();
+        SettingsProvider.Instance.RegisterUIComponent("FileSearching", () => new FileSearcherSettingsComponent());
+        _settings = SettingsProvider.Instance.AttachSettings<FileSearcherSettings>();
+        _searchingEngine = new SearchingEngine(indexStoragePath);
         var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);
-        _multiFieldParser = new MultiFieldQueryParser(LuceneVersion.LUCENE_48, 
-            new[] {"fileName", "content"}, analyzer);
+        _multiFieldParser = new MultiFieldQueryParser(LuceneVersion.LUCENE_48, ["fileName", "content"], analyzer);
+
+        var startTimestamp = DateTime.Now;
+        IndexFiles();
+        var endTimestamp = DateTime.Now;
+        Console.WriteLine($"Indexing took {(endTimestamp - startTimestamp).TotalMinutes} minutes");
     }
 
     public List<SearchResult> SearchByFileName(string fileName, int maxResults = 100)
@@ -140,89 +87,114 @@ public class FileSearcher
         return results.OrderByDescending(x => x.Score).ToList();
     }
     
-    private void IndexFiles()
+    
+    private async void IndexFiles()
     {
-        var rootPath = "c://workspace";
-        Console.WriteLine($"Strat indexing in {rootPath}...");
-        
         try
         {
-            IndexDirectory(rootPath);
+            var tasks = new List<Task>();
+            var drivesToIndex = GetDrivesToIndex();
+            var allFiles = new List<string>();
+            try
+            {
+                foreach (var rootPath in drivesToIndex)
+                {
+                    tasks.Add(Task.Run(() =>
+                    {
+                        allFiles.AddRange(GetAllFilesRecursive(rootPath));
+                    }));
+                }
+            
+                await Task.WhenAll(tasks);
+            
+                const int batchSize = 1000;
+                var batches = allFiles
+                    .Select((file, index) => new { file, index })
+                    .GroupBy(x => x.index / batchSize)
+                    .Select(g => g.Select(x => x.file).ToList())
+                    .ToList();
+            
+                tasks = batches.Select(batch => Task.Run(() => IndexFilesBatch(batch))).ToList();
+                await Task.WhenAll(tasks);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while indexing: {ex.Message}");
+            }
+
+            await Task.Run(() =>
+            {
+                _searchingEngine.Commit();
+                Console.WriteLine("Indexing complete!");
+            });
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error while indexing: {ex.Message}");
+            Log.Error(e, "Error while indexing");
         }
-        
-        _searchingEngine.Commit();
-        Console.WriteLine("Indexing complete!");
     }
 
-    private void IndexDirectory(string directoryPath)
+    private List<string> GetDrivesToIndex()
     {
-        try
+        var rootDirectoriesToIndex = new List<string>();
+        var drives = DriveInfo.GetDrives();
+        foreach (var drive in drives)
         {
-            if (ShouldSkipDirectory(directoryPath))
+            var needToIndex = true;
+            foreach (var settingDrive in _settings?.GetDrivesToIndex()!)
             {
-                Console.WriteLine($"Skip directory: {directoryPath}");
-                return;
-            }
-            
-            if (!HasDirectoryAccess(directoryPath))
-            {
-                Console.WriteLine($"No permission to directory: {directoryPath}");
-                return;
-            }
-            
-            try
-            {
-                var files = Directory.EnumerateFiles(directoryPath);
-                foreach (var file in files)
+                if (settingDrive.Name.Equals(drive.Name, StringComparison.InvariantCultureIgnoreCase) && !settingDrive.Enabled)
                 {
-                    try
-                    {
-                        IndexSingleFile(file);
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        Console.WriteLine($"No permission to file: {file}");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error indexing {file}: {ex.Message}");
-                    }
+                    needToIndex = false;
                 }
             }
-            catch (UnauthorizedAccessException)
+
+            if (needToIndex)
             {
-                Console.WriteLine($"No permission to directory: {directoryPath}");
-                return;
+                rootDirectoriesToIndex.Add(drive.RootDirectory.FullName);
+            }
+        }
+        return rootDirectoriesToIndex;
+    }
+
+    private List<string> GetAllFilesRecursive(string directoryPath)
+    {
+        var allFiles = new List<string>();
+        var queue = new Queue<string>();
+        queue.Enqueue(directoryPath);
+        while (queue.Count > 0)
+        {
+            var currentDirectory = queue.Dequeue();
+            if (ShouldSkipDirectory(currentDirectory) || !HasDirectoryAccess(currentDirectory))
+            {
+                continue;
             }
             
-            try
+            var files = Directory.EnumerateFiles(currentDirectory);
+            allFiles.AddRange(files);
+            
+            var subdirectories = Directory.EnumerateDirectories(currentDirectory);
+            foreach (var subdirectory in subdirectories)
             {
-                var subdirectories = Directory.EnumerateDirectories(directoryPath);
-                foreach (var subdirectory in subdirectories)
-                {
-                    IndexDirectory(subdirectory);
-                }
-            }
-            catch (UnauthorizedAccessException)
-            {
-                Console.WriteLine($"No permission to directory: {directoryPath}");
+                queue.Enqueue(subdirectory);
             }
         }
-        catch (Exception ex)
+        return allFiles;
+    }
+
+    private void IndexFilesBatch(List<string> files)
+    {
+        var parallelOption = new ParallelOptions()
         {
-            Console.WriteLine($"Error while processing directory {directoryPath}: {ex.Message}");
-        }
+            MaxDegreeOfParallelism = 128
+        };
+        Parallel.ForEach(files, parallelOption, IndexSingleFile);
     }
 
     private void IndexSingleFile(string file)
     {
         var fileInfo = new FileInfo(file);
-
-        if (_searchingEngine.IsFileIndexed(file, fileInfo.LastWriteTime))
+        if (!fileInfo.Exists)
         {
             return;
         }
@@ -230,8 +202,9 @@ public class FileSearcher
         Console.WriteLine($"Indexing {file}");
         
         var content = GetFileContent(file);
-        
+
         _searchingEngine.IndexFile(file, content);
+
     }
 
     private static bool HasDirectoryAccess(string directoryPath)
@@ -255,19 +228,14 @@ public class FileSearcher
         }
     }
 
-    
     private string GetFileContent(string filePath)
     {
+        var fileName = Path.GetFileName(filePath);
         var extension = Path.GetExtension(filePath);
         
-        // if (BinaryExtensions.Contains(extension))
-        // {
-        //     return "";
-        // }
-
-        if (TextExtensions.Contains(extension))
+        if (!_settings!.GetReadContentExtensions().Contains(extension) || !_settings.GetReadContentFiles().Contains(fileName))
         {
-            return ReadTextFileContent(filePath);
+            return "";
         }
 
         if (string.IsNullOrEmpty(extension) || IsTextFile(filePath))
@@ -278,7 +246,7 @@ public class FileSearcher
         return "";
     }
     
-    private string ReadTextFileContent(string filePath)
+    private static string ReadTextFileContent(string filePath)
     {
         try
         {
@@ -291,23 +259,23 @@ public class FileSearcher
         }
     }
     
-    private bool IsTextFile(string filePath, int sampleSize = 512)
+    private static bool IsTextFile(string filePath, int sampleSize = 512)
     {
         try
         {
             using var fileStream = File.OpenRead(filePath);
             var buffer = new byte[Math.Min(sampleSize, (int)fileStream.Length)];
-            int bytesRead = fileStream.Read(buffer, 0, buffer.Length);
+            var bytesRead = fileStream.Read(buffer, 0, buffer.Length);
             
             if (bytesRead == 0) return true;
             
-            for (int i = 0; i < bytesRead; i++)
+            for (var i = 0; i < bytesRead; i++)
             {
                 if (buffer[i] == 0) return false;
             }
             
-            int printableCount = 0;
-            for (int i = 0; i < bytesRead; i++)
+            var printableCount = 0;
+            for (var i = 0; i < bytesRead; i++)
             {
                 byte b = buffer[i];
                 if (IsPrintableOrWhitespace(b))
@@ -316,7 +284,7 @@ public class FileSearcher
                 }
             }
             
-            double printableRatio = (double)printableCount / bytesRead;
+            var printableRatio = (double)printableCount / bytesRead;
             return printableRatio >= 0.95;
         }
         catch
@@ -336,43 +304,8 @@ public class FileSearcher
 
     private bool ShouldSkipDirectory(string directoryPath)
     {
-        var dirName = Path.GetFileName(directoryPath);
         var fullPath = Path.GetFullPath(directoryPath);
-        
-        var unixSystemDirs = new[] { "/proc", "/sys", "/dev", "/run", "/tmp", "/var", "/snap", "/usr" };
-        if (unixSystemDirs.Any(sysDir => fullPath.StartsWith(sysDir + "/") || fullPath == sysDir))
-        {
-            return true;
-        }
-        
-        if (SkipDirectories.Contains(dirName))
-        {
-            return true;
-        }
-        
-        if (dirName.StartsWith(".") && !IsImportantHiddenDirectory(dirName))
-        {
-            return true;
-        }
-        
-        if (dirName.Contains("cache", StringComparison.OrdinalIgnoreCase) ||
-            dirName.Contains("temp", StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-    
-        return false;
+        return _settings!.GetAllDirectoriesToSkip().Any(value => fullPath.Contains(value));
     }
-
-    private static bool IsImportantHiddenDirectory(string dirName)
-    {
-        // Некоторые скрытые папки могут содержать полезные файлы
-        var importantHiddenDirs = new[] { 
-            ".config", ".local", ".ssh", ".bashrc", ".vimrc", 
-            ".profile", ".gitconfig", ".npmrc", ".dockerenv" 
-        };
-        return importantHiddenDirs.Contains(dirName, StringComparer.OrdinalIgnoreCase);
-    }
-
 
 }

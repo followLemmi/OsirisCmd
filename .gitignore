@@ -1,3 +1,7 @@
 .idea/
 obj/
 bin/
+.vscode/
+indexes/
+Logs/
+settings.json

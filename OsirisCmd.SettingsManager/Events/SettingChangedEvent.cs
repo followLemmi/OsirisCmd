@@ -1,12 +1,15 @@
-﻿namespace SettingsManager.Events;
+﻿using Serilog;
+
+namespace OsirisCmd.SettingsManager.Events;
 
 public static class SettingChangedEvent
 {
-    public delegate void SettingChangedHandler();
-    public static event SettingChangedHandler? SettingChanged;
+    public delegate void SettingChangedDelegate(object? settingItem);
+    public static event SettingChangedDelegate? SettingChanged;
 
-    public static void Invoke()
+    public static void Invoke(object? settingItem)
     {
-        SettingChanged!.Invoke();
+        Log.Debug("Invoke Event --- SettingChangedEvent");
+        SettingChanged!.Invoke(settingItem);
     }
 }
