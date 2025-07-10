@@ -1,4 +1,5 @@
-﻿using OsirisCmd.SearchingEngine;
+﻿using System.Collections.Concurrent;
+using OsirisCmd.SearchingEngine;
 using OsirisCmd.SettingsManager;
 using Xunit.Abstractions;
 
@@ -14,18 +15,86 @@ public class UnitTest1
     }
 
     [Fact]
-    public void Test1()
+    public void FileSystemCollectorTest()
     {
-        SettingsProvider.Initialize();
-        var startTimestamp = DateTime.Now;
-        var fileSearcher = new FileSearcher("./indexes");
-        var result = fileSearcher.SearchByFileContent("Aft");
-        // var result = fileSearcher.SearchByFileName("Test");
-        foreach (var searchResult in result)
+        var startTime = DateTime.Now;
+        var result = new ConcurrentBag<string>();
+        var dirs = new ConcurrentQueue<string>();
+
+        dirs.Enqueue("C:\\");
+        dirs.Enqueue("D:\\");
+
+        var options = new ParallelOptions
         {
-            _testOutputHelper.WriteLine(searchResult.ToString());
+            MaxDegreeOfParallelism = Environment.ProcessorCount
+        };
+
+        Parallel.ForEach(Partitioner.Create(0, Environment.ProcessorCount * 1000), options, (range, state) =>
+        {
+            while (dirs.TryDequeue(out var currentDir))
+            {
+                try
+                {
+                    foreach (var file in Directory.EnumerateFiles(currentDir))
+                    {
+                        result.Add(file);
+                    }
+                    foreach (var dir in Directory.EnumerateDirectories(currentDir)) {
+                        dirs.Enqueue(dir);
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error {e}");
+                }
+            }
+        });
+
+        var endTime = DateTime.Now;
+
+        Console.WriteLine("--------------------------------");
+        Console.WriteLine($"Total files collected {result.Count()}");
+        Console.WriteLine($"Time elapced {(endTime - startTime).TotalMinutes}");
+        Console.WriteLine("--------------------------------");
+
+    }
+
+    [Fact]
+    public void SecondFSCollecttorTest() {
+        var startTime = DateTime.Now;
+        var result = GetAllFilesRecursive("C:\\");
+        var endTime = DateTime.Now;
+
+        Console.WriteLine("--------------------------------");
+        Console.WriteLine($"Total files collected {result.Count()}");
+        Console.WriteLine($"Time elapced {(endTime - startTime).TotalMinutes}");
+        Console.WriteLine("--------------------------------");
+    }
+
+    private List<string> GetAllFilesRecursive(string directoryPath)
+    {
+        var allFiles = new List<string>();
+        var queue = new Queue<string>();
+        queue.Enqueue("C:\\");
+        queue.Enqueue("D:\\");
+        while (queue.Count > 0)
+        {
+            try {
+                var currentDirectory = queue.Dequeue();
+            
+                var files = Directory.EnumerateFiles(currentDirectory);
+                allFiles.AddRange(files);
+                
+                var subdirectories = Directory.EnumerateDirectories(currentDirectory);
+                foreach (var subdirectory in subdirectories)
+                {
+                    queue.Enqueue(subdirectory);
+                }
+            } catch (Exception e) {
+                Console.WriteLine($"Error {e}");
+            }
         }
-        var endTimestamp = DateTime.Now;
-        _testOutputHelper.WriteLine($"Time elapsed: {(endTimestamp - startTimestamp).TotalSeconds} ms");
+        return allFiles;
     }
 }

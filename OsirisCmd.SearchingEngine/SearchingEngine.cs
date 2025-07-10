@@ -73,6 +73,7 @@ public class SearchingEngine
 
     public void Commit()
     {
+        _indexWriter.ForceMerge(1);
         _indexWriter.Commit();
         RefreshSearcher();
     }
