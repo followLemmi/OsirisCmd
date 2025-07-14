@@ -5,11 +5,11 @@ using Xunit.Abstractions;
 
 namespace OsirisCmd.Tests;
 
-public class UnitTest1
+public class FileSearcherPerfomanceTest
 {
     private readonly ITestOutputHelper _testOutputHelper;
 
-    public UnitTest1(ITestOutputHelper testOutputHelper)
+    public FileSearcherPerfomanceTest(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
     }
@@ -22,7 +22,6 @@ public class UnitTest1
         var dirs = new ConcurrentQueue<string>();
 
         dirs.Enqueue("C:\\");
-        dirs.Enqueue("D:\\");
 
         var options = new ParallelOptions
         {
@@ -77,7 +76,6 @@ public class UnitTest1
         var allFiles = new List<string>();
         var queue = new Queue<string>();
         queue.Enqueue("C:\\");
-        queue.Enqueue("D:\\");
         while (queue.Count > 0)
         {
             try {
