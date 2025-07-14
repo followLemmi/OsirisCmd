@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
@@ -11,6 +12,8 @@ namespace OsirisCmd.SearchingEngine;
 
 public class FileSearcher
 {
+    private ConcurrentQueue<string> _filesToIndex = new();
+    
     private readonly SearchingEngine _searchingEngine;
     private readonly QueryParser _fileNameParser;
     private readonly QueryParser _fileContentParser;
@@ -28,10 +31,7 @@ public class FileSearcher
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);
         _multiFieldParser = new MultiFieldQueryParser(LuceneVersion.LUCENE_48, ["fileName", "content"], analyzer);
 
-        var startTimestamp = DateTime.Now;
-        IndexFiles();
-        var endTimestamp = DateTime.Now;
-        Console.WriteLine($"Indexing took {(endTimestamp - startTimestamp).TotalMinutes} minutes");
+        StartupIndexing();
     }
 
     public List<SearchResult> SearchByFileName(string fileName, int maxResults = 100)
@@ -88,23 +88,18 @@ public class FileSearcher
     }
     
     
-    private async void IndexFiles()
+    private async void StartupIndexing()
     {
         try
         {
+            var startTimestamp = DateTime.Now;
             var tasks = new List<Task>();
             var drivesToIndex = GetDrivesToIndex();
             var allFiles = new List<string>();
             try
             {
-                foreach (var rootPath in drivesToIndex)
-                {
-                    tasks.Add(Task.Run(() =>
-                    {
-                        allFiles.AddRange(GetAllFilesRecursive(rootPath));
-                    }));
-                }
-            
+                tasks.AddRange(drivesToIndex.Select(rootPath => Task.Run(() => { allFiles.AddRange(GetAllFilesRecursive(rootPath)); })));
+
                 await Task.WhenAll(tasks);
             
                 const int batchSize = 1000;
@@ -125,6 +120,8 @@ public class FileSearcher
             await Task.Run(() =>
             {
                 _searchingEngine.Commit();
+                var endTimestamp = DateTime.Now;
+                Console.WriteLine($"Indexing took {(endTimestamp - startTimestamp).TotalMinutes} minutes");
                 Console.WriteLine("Indexing complete!");
             });
         }
