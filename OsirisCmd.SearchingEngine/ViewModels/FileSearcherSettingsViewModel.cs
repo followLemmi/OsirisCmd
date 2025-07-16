@@ -1,4 +1,5 @@
-﻿using OsirisCmd.SearchingEngine.Settings;
+﻿using OsirisCmd.DI;
+using OsirisCmd.SearchingEngine.Settings;
 using OsirisCmd.SettingsManager;
 
 namespace OsirisCmd.SearchingEngine.ViewModels;
@@ -10,7 +11,7 @@ public class FileSearcherSettingsViewModel
 
     public FileSearcherSettingsViewModel()
     {
-        Settings = SettingsProvider.Instance.AttachSettings<FileSearcherSettings>();
+        Settings = ServiceLocator.GetService<ISettingsProviderService>().AttachSettings<FileSearcherSettings>();
     }
     
 }

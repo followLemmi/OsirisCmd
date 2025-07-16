@@ -27,16 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OsirisCmd.PluginsManager\OsirisCmd.PluginsManager.csproj" />
     <ProjectReference Include="..\OsirisCmd.SearchingEngine\OsirisCmd.SearchingEngine.csproj" />
     <ProjectReference Include="..\OsirisCmd.SettingsManager\OsirisCmd.SettingsManager.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Components\PluginsSettingsComponent.axaml.cs">
-      <DependentUpon>PluginsSettingsView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
+    <ProjectReference Include="..\OsirisCmd.DI\OsirisCmd.DI.csproj" />
   </ItemGroup>
 
   <Target Name="CreatePluginsFolder" AfterTargets="AfterBuild">
@@ -47,5 +40,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Components\" />
   </ItemGroup>
 </Project>

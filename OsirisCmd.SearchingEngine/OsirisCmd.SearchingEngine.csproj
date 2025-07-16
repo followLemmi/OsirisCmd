@@ -21,6 +21,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\OsirisCmd.DI\OsirisCmd.DI.csproj" />
         <ProjectReference Include="..\OsirisCmd.Localization\OsirisCmd.Localization.csproj" />
         <ProjectReference Include="..\OsirisCmd.SettingsManager\OsirisCmd.SettingsManager.csproj"/>
     </ItemGroup>

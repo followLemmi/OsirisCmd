@@ -10,7 +10,7 @@ using Serilog;
 
 namespace OsirisCmd.SearchingEngine;
 
-public class FileSearcher
+public class FileSearcherService : IFileSearcherService
 {
     private ConcurrentQueue<string> _filesToIndex = new();
     
@@ -21,11 +21,11 @@ public class FileSearcher
 
     private readonly FileSearcherSettings? _settings;
     
-    public FileSearcher(string indexStoragePath)
+    public FileSearcherService(ISettingsProviderService? settingsProvider)
     {
-        SettingsProvider.Instance.RegisterUIComponent("FileSearching", () => new FileSearcherSettingsComponent());
-        _settings = SettingsProvider.Instance.AttachSettings<FileSearcherSettings>();
-        _searchingEngine = new SearchingEngine(indexStoragePath);
+        settingsProvider!.RegisterUIComponent("FileSearching", () => new FileSearcherSettingsComponent());
+        _settings = settingsProvider.AttachSettings<FileSearcherSettings>();
+        _searchingEngine = new SearchingEngine(".\\indexes"); //TODO: Task OsirisCmd-16
         var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);
