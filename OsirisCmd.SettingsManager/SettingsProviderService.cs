@@ -8,11 +8,11 @@ using Serilog;
 
 namespace OsirisCmd.SettingsManager;
 
-public class SettingsProvider
+public class SettingsProviderService : ISettingsProviderService
 {
     private const string SettingsFileName = "settings.json";
 
-    private static SettingsProvider? _instance;
+    // private static SettingsProvider? _instance;
 
     private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions()
     {
@@ -24,22 +24,9 @@ public class SettingsProvider
     public AvaloniaDictionary<string, Func<UserControl>> UIComponents { get; } = new();
     private Dictionary<string, JsonElement> PendingSettings { get; } = new();
 
-    public static SettingsProvider Instance
+    public SettingsProviderService()
     {
-        get
-        {
-            if (_instance == null)
-            {
-                throw new InvalidOperationException("Settings provider has not been initialized.");
-            }
-
-            return _instance;
-        }
-    }
-
-    private SettingsProvider()
-    {
-        _instance = this;
+        // _instance = this;
         LoadSettings();
         
         SettingChangedEvent.SettingChanged += (changedSetting) =>
@@ -47,18 +34,6 @@ public class SettingsProvider
             Log.Debug("Settings changed {ChangedSetting}", changedSetting);
             SaveSettings();
         };
-    }
-
-    public static void Initialize()
-    {
-        Log.Debug("Initialize SettingsProvider");
-        if (_instance != null)
-        {
-            Log.Error("SettingsProvider service has already been initialized.");
-            throw new InvalidOperationException("Settings provider has already been initialized.");
-        }
-        
-        _instance = new SettingsProvider();
     }
 
     private void LoadSettings()
@@ -95,7 +70,7 @@ public class SettingsProvider
         Log.Debug("Saving settings: {Json}", json);
         File.WriteAllText(SettingsFileName, json);
     }
-
+    
     public void RegisterUIComponent(string sectionName, Func<UserControl> uiComponent)
     {
         Log.Debug("Register UI for {SectionName}", sectionName);

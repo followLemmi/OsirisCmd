@@ -13,7 +13,7 @@ public class PluginManager
     private static readonly object Lock = new object();
     private static PluginManager? _instance;
     
-    private readonly SettingsProvider _settingsProvider = SettingsProvider.Instance;
+    // private readonly SettingsProvider _settingsProvider = SettingsProvider.Instance;
 
     public static PluginManager Instance
     {
