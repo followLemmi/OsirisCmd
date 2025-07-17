@@ -5,7 +5,6 @@ using OsirisCmd.SettingsManager;
 
 namespace OsirisCmd.SearchingEngine.Settings;
 
-
 public class FileSearcherSettings : ISettings
 {
     /// <summary>
@@ -20,8 +19,13 @@ public class FileSearcherSettings : ISettings
         },
         new()
         {
-            Name = "DrivesToIndex",
-            Value = GetDefaultDrivesToIndex()
+            Name = "PathToIndexes",
+            Value = GetDefaultOsSpecificPathToIndexes()
+        },
+        new()
+        {
+        Name = "DrivesToIndex",
+        Value = GetDefaultDrivesToIndex()
         },
         new()
         {
@@ -48,7 +52,7 @@ public class FileSearcherSettings : ISettings
                                 "/dev"
                             }
                         },
-                        new ()
+                        new()
                         {
                             Name = "Windows",
                             Value = new List<string>()
@@ -57,7 +61,7 @@ public class FileSearcherSettings : ISettings
                                 "\\ProgrammData",
                             }
                         },
-                        new ()
+                        new()
                         {
                             Name = "MacOS",
                             Value = new List<string>()
@@ -66,7 +70,8 @@ public class FileSearcherSettings : ISettings
                                 "/private",
                             }
                         },
-                        new () {
+                        new()
+                        {
                             Name = "General",
                             Value = new List<string>()
                             {
@@ -88,117 +93,38 @@ public class FileSearcherSettings : ISettings
             Name = "FileSettings",
             Value = new List<SettingItem>()
             {
-            //     new()
-            //     {
-            //         Name = "FileNameOnly",
-            //         Value = new List<string>()
-            //         {
-            //             // Archives
-            //             ".zip",
-            //             ".rar",
-            //             ".7z",
-            //             ".tar",
-            //             ".gz",
-            //             ".bz2",
-            //             ".xz",
-            //             ".cab",
-            //             ".iso",
-            //             ".img",
-            //             ".dmg",
-            //             ".vhd",
-            //             ".vhdx",
-            //             ".jar",
-            //             ".war",
-            //
-            //             // Binary
-            //             ".exe",
-            //             ".dll",
-            //             ".bin",
-            //             ".msi",
-            //             ".sys",
-            //             ".ocx",
-            //             ".so",
-            //             ".deb",
-            //             ".rpm",
-            //             ".apk",
-            //             ".com",
-            //             ".out",
-            //             ".o",
-            //             ".a",
-            //
-            //             // Media
-            //             ".mp3",
-            //             ".wav",
-            //             ".flac",
-            //             ".aac",
-            //             ".ogg",
-            //             ".m4a",
-            //             ".mp4",
-            //             ".avi",
-            //             ".mkv",
-            //             ".mov",
-            //             ".webm",
-            //             ".wmv",
-            //             ".flv",
-            //
-            //             // Images
-            //             ".jpg",
-            //             ".jpeg",
-            //             ".png",
-            //             ".bmp",
-            //             ".gif",
-            //             ".tiff",
-            //             ".webp",
-            //             ".svg",
-            //             ".ico",
-            //             ".heic",
-            //             ".raw",
-            //             ".nef",
-            //             ".cr2",
-            //             ".arw",
-            //
-            //             // Modeling
-            //             ".dwg",
-            //             ".dxf",
-            //             ".stl",
-            //             ".obj",
-            //             ".3ds",
-            //             ".fbx",
-            //             ".blend"
-            //         }
-            //     }
-            new()
-            {
-                Name = "ReadContentExtensions",
-                Value = new List<string>()
+                new()
                 {
-                    ".txt", ".md", ".rst", ".log", ".csv", ".tsv",
-                    
-                    ".ini", ".conf", ".properties", ".env",
-                    
-                    ".c", ".h", ".cpp", ".cc", ".cxx", ".hpp", ".hxx", ".cs", ".java", ".py",
-                    ".js", ".ts", ".rb", ".go", ".rs", ".php", ".swift", ".kt", ".kts", ".dart",
-                    ".m", ".mm", ".scala", ".hs", ".lua", ".pl", ".r", ".jl", ".groovy", ".clj",
-                    ".sql", ".asm", ".s",
-                    
-                    ".html", ".htm", ".xhtml", ".css", ".scss", ".sass", ".less", ".vue",
-                    ".jsx", ".tsx",
-                    
-                    ".sh", ".bash", ".zsh", ".fish", ".ps1", ".bat", ".cmd", ".make",
-                    ".gradle", ".pom",
-                    
-                    ".feature", ".spec.js", ".test.js", ".robot", ".doctest", ".story"
-                }
-            },
-            new()
-            {
-                Name = "ReadContentFiles",
-                Value = new List<string>()
+                    Name = "ReadContentExtensions",
+                    Value = new List<string>()
+                    {
+                        ".txt", ".md", ".rst", ".log", ".csv", ".tsv",
+
+                        ".ini", ".conf", ".properties", ".env",
+
+                        ".c", ".h", ".cpp", ".cc", ".cxx", ".hpp", ".hxx", ".cs", ".java", ".py",
+                        ".js", ".ts", ".rb", ".go", ".rs", ".php", ".swift", ".kt", ".kts", ".dart",
+                        ".m", ".mm", ".scala", ".hs", ".lua", ".pl", ".r", ".jl", ".groovy", ".clj",
+                        ".sql", ".asm", ".s",
+
+                        ".html", ".htm", ".xhtml", ".css", ".scss", ".sass", ".less", ".vue",
+                        ".jsx", ".tsx",
+
+                        ".sh", ".bash", ".zsh", ".fish", ".ps1", ".bat", ".cmd", ".make",
+                        ".gradle", ".pom",
+
+                        ".feature", ".spec.js", ".test.js", ".robot", ".doctest", ".story"
+                    }
+                },
+                new()
                 {
-                    "Dockerfile",
-                    "Makefile"
+                    Name = "ReadContentFiles",
+                    Value = new List<string>()
+                    {
+                        "Dockerfile",
+                        "Makefile"
+                    }
                 }
-            }
             }
         },
     ];
@@ -209,7 +135,27 @@ public class FileSearcherSettings : ISettings
         {
             return [];
         }
-        return DriveInfo.GetDrives().Select(drive => new DriveToIndex() { Name = drive.Name, Enabled = true, }).ToList();
+
+        return DriveInfo.GetDrives().Select(drive => new DriveToIndex() { Name = drive.Name, Enabled = true, })
+            .ToList();
+    }
+
+    private static string GetDefaultOsSpecificPathToIndexes()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return "~/.config/osiris/indexes/";
+        }
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\OsirisCmd\\indexes\\";;
+        }
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return "~/Library/Preferences/OsirisCmd/indexes/";
+        }
+
+        return "";
     }
 
     public bool IsFileIndexingEnabled()
@@ -225,7 +171,7 @@ public class FileSearcherSettings : ISettings
         if (drivesToIndex.Value == null) throw new Exception("Settings for drives to index have no value");
         return drivesToIndex.Value as List<DriveToIndex>;
     }
-    
+
     public List<string> GetAllDirectoriesToSkip()
     {
         var result = new List<string>();
@@ -233,41 +179,55 @@ public class FileSearcherSettings : ISettings
         var directoriesSettings = Settings.First(item => item.Name.Equals("DirectoriesSettings"));
         if (directoriesSettings != null)
         {
-            var directoriesToSkip = ((List<SettingItem>)directoriesSettings.Value).First(item => item.Name.Equals("SkipDirectories"));
-            ((List<SettingItem>) directoriesToSkip.Value).ForEach(item => 
+            var directoriesToSkip =
+                ((List<SettingItem>)directoriesSettings.Value).First(item => item.Name.Equals("SkipDirectories"));
+            ((List<SettingItem>)directoriesToSkip.Value).ForEach(item =>
             {
                 ((List<string>)item.Value).ForEach(directory => result.Add(directory));
             });
             return result;
         }
+
         throw new Exception("Settings for directories not found");
     }
 
     public List<string> GetReadContentExtensions()
     {
         var result = new List<string>();
-        
+
         var fileSettings = Settings.First(item => item.Name.Equals("FileSettings"));
         if (fileSettings != null)
         {
-            var fileNameOnly = ((List<SettingItem>)fileSettings.Value).First(item => item.Name.Equals("ReadContentExtensions"));
+            var fileNameOnly =
+                ((List<SettingItem>)fileSettings.Value).First(item => item.Name.Equals("ReadContentExtensions"));
             ((List<string>)fileNameOnly.Value).ForEach(item => result.Add(item));
             return result;
         }
+
         throw new Exception("Settings for file name only not found");
     }
 
     public List<string> GetReadContentFiles()
     {
         var result = new List<string>();
-        
+
         var fileSettings = Settings.First(item => item.Name.Equals("FileSettings"));
         if (fileSettings != null)
         {
-            var fileNameOnly = ((List<SettingItem>)fileSettings.Value).First(item => item.Name.Equals("ReadContentFiles"));
+            var fileNameOnly =
+                ((List<SettingItem>)fileSettings.Value).First(item => item.Name.Equals("ReadContentFiles"));
             ((List<string>)fileNameOnly.Value).ForEach(item => result.Add(item));
             return result;
         }
+
         throw new Exception("Settings for file name only not found");
+    }
+
+    public string GetPathToIndexes()
+    {
+        var pathToIndexes = Settings.First(item => item.Name.Equals("PathToIndexes"));
+        if (pathToIndexes == null) throw new Exception("Settings for path to indexes not found");
+        if (pathToIndexes.Value == null) throw new Exception("Settings for path to indexes have no value");
+        return (string)pathToIndexes.Value;
     }
 }

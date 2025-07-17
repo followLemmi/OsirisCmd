@@ -25,7 +25,7 @@ public class FileSearcherService : IFileSearcherService
     {
         settingsProvider!.RegisterUIComponent("FileSearching", () => new FileSearcherSettingsComponent());
         _settings = settingsProvider.AttachSettings<FileSearcherSettings>();
-        _searchingEngine = new SearchingEngine(".\\indexes"); //TODO: Task OsirisCmd-16
+        _searchingEngine = new SearchingEngine(_settings.GetPathToIndexes());
         var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);

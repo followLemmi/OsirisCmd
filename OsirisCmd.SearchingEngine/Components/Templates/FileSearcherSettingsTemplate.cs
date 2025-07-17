@@ -33,7 +33,7 @@ public class FileSearcherSettingsTemplate : IDataTemplate
                 {
                     new ColumnDefinition() { Width = GridLength.Auto },
                     new ColumnDefinition() { Width = GridLength.Star },
-                    new ColumnDefinition() {Width = GridLength.Auto}
+                    new ColumnDefinition() { Width = GridLength.Auto }
                 },
                 Children =
                 {
@@ -43,7 +43,7 @@ public class FileSearcherSettingsTemplate : IDataTemplate
                         FontSize = 16,
                         VerticalAlignment = VerticalAlignment.Stretch,
                         HorizontalAlignment = HorizontalAlignment.Center,
-                        [Grid.ColumnProperty] = 0       
+                        [Grid.ColumnProperty] = 0
                     },
                     new ToggleSwitch()
                     {
@@ -53,7 +53,38 @@ public class FileSearcherSettingsTemplate : IDataTemplate
                         [!ToggleButton.IsCheckedProperty] = new Binding("Value", BindingMode.TwoWay),
                         VerticalAlignment = VerticalAlignment.Stretch,
                         HorizontalAlignment = HorizontalAlignment.Center,
-                        [Grid.ColumnProperty] = 2    
+                        [Grid.ColumnProperty] = 2
+                    }
+                }
+            },
+            string s => new Grid()
+            {
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Margin = new Thickness(0, 5, 0, 5),
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition() { Width = GridLength.Auto },
+                    new ColumnDefinition() { Width = GridLength.Star },
+                    new ColumnDefinition() { Width = GridLength.Auto }
+                },
+                Children =
+                {
+                    new TextBlock()
+                    {
+                        Text = setting.Name,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        [Grid.ColumnProperty] = 0
+                    },
+                    new TextBox()
+                    {
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Width = 400,
+                        [!TextBox.TextProperty] = new Binding("Value")
+                        {
+                            Mode = BindingMode.TwoWay,
+                        },
+                        TextWrapping = TextWrapping.Wrap,
+                        [Grid.ColumnProperty] = 2
                     }
                 }
             },
@@ -63,9 +94,9 @@ public class FileSearcherSettingsTemplate : IDataTemplate
                 Margin = new Thickness(0, 5, 0, 5),
                 ColumnDefinitions =
                 {
-                    new ColumnDefinition() { Width = GridLength.Auto },   
+                    new ColumnDefinition() { Width = GridLength.Auto },
                     new ColumnDefinition() { Width = GridLength.Star },
-                    new ColumnDefinition() {Width = GridLength.Auto}
+                    new ColumnDefinition() { Width = GridLength.Auto }
                 },
                 Children =
                 {
@@ -113,7 +144,6 @@ public class FileSearcherSettingsTemplate : IDataTemplate
                     ItemsSource = s,
                     ItemTemplate = new DrivesToIndexTemplate(),
                 }
-                
             },
             _ => new TextBlock()
             {
