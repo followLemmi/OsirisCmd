@@ -57,7 +57,7 @@ public class FileSearcherSettingsTemplate : IDataTemplate
                     }
                 }
             },
-            string s => new Grid()
+            string _ => new Grid()
             {
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 Margin = new Thickness(0, 5, 0, 5),

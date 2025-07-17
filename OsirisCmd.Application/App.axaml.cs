@@ -1,3 +1,4 @@
+using Application.Components;
 using Application.Views;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -16,6 +17,10 @@ public partial class App : Avalonia.Application
         AvaloniaXamlLoader.Load(this);
         
         DIContainer.Initialize(ConfigureServices);
+        
+        var settingsProvider = ServiceLocator.GetService<ISettingsProviderService>();
+        settingsProvider.RegisterUIComponent("General", () => new GeneralSettingsComponent());
+        
         ServiceLocator.GetService<IFileSearcherService>();
     }
 

@@ -4,6 +4,7 @@ using Lucene.Net.Index;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
+using Serilog;
 
 namespace OsirisCmd.SearchingEngine;
 
@@ -87,6 +88,7 @@ public class SearchingEngine
 
     private void InitializeIndex()
     {
+        EnsureIndexDirectoryIsAccessible(_indexPath);
         var directory = FSDirectory.Open(_indexPath);
         var config = new IndexWriterConfig(LuceneVersion.LUCENE_48, _analyzer)
         {
@@ -96,6 +98,23 @@ public class SearchingEngine
         _indexWriter = new IndexWriter(directory, config);
     }
 
+    
+    private void EnsureIndexDirectoryIsAccessible(string indexPath)
+    {
+        var lockFilePath = Path.Combine(indexPath, "write.lock");
+        if (File.Exists(lockFilePath))
+        {
+            try
+            {
+                File.Delete(lockFilePath);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"Could not delete lock file: {ex.Message}");
+            }
+        }
+    }
+    
     private void RefreshSearcher()
     {
         _directoryReader?.Dispose();
