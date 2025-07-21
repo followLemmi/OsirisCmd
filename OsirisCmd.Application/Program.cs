@@ -1,7 +1,6 @@
 ﻿using System;
 using Avalonia;
-using Microsoft.Extensions.Configuration;
-using Serilog;
+using System.IO;
 
 namespace Application;
 
@@ -10,31 +9,10 @@ class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        // Настройка конфигурации
-        var configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .Build();
-        
-        // Настройка статического Serilog логгера
-        Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration)
-            .CreateLogger();
+        CreateApplicationFolders();
 
-        try
-        {
-            Log.Information("Starting OsirisCmd application");
-
-            BuildAvaloniaApp()
-                .StartWithClassicDesktopLifetime(args);
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "Application terminated unexpectedly");
-        }
-        finally
-        {
-            Log.CloseAndFlush();
-        }
+        BuildAvaloniaApp()
+            .StartWithClassicDesktopLifetime(args);
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.
@@ -43,4 +21,17 @@ class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
+
+    private static void CreateApplicationFolders()
+    {
+        var applicationLocalAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/OsirisCmd";
+        if (!Directory.Exists(applicationLocalAppDataPath)) {
+            Directory.CreateDirectory(applicationLocalAppDataPath);
+        }
+        if (!Directory.Exists(applicationLocalAppDataPath + "/appdata"))
+        {
+            Directory.CreateDirectory(applicationLocalAppDataPath + "/appdata");
+        }
+    }
+
 }

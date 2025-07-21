@@ -148,7 +148,7 @@ public class FileSearcherSettings : ISettings
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\OsirisCmd\\indexes\\";;
+            return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\OsirisCmd\\indexes\\";
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {

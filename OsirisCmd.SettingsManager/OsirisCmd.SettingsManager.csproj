@@ -8,7 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.2.6" />
-    <PackageReference Include="Serilog" Version="4.3.1-dev-02373" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OsirisCmd.DI\OsirisCmd.DI.csproj" />
+    <ProjectReference Include="..\OsirisCmd.Logger\OsirisCmd.Logger.csproj" />
   </ItemGroup>
 
 </Project>

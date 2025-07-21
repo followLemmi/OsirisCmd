@@ -1,8 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using OsirisCmd.DI;
-using OsirisCmd.SettingsManager;
+﻿using Avalonia.Controls;
 
 namespace Application.Components;
 

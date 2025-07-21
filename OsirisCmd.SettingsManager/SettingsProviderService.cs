@@ -4,17 +4,18 @@ using Avalonia.Collections;
 using Avalonia.Controls;
 using OsirisCmd.SettingsManager.Converters;
 using OsirisCmd.SettingsManager.Events;
-using Serilog;
+using OsirisCmd.Logger;
+using OsirisCmd.DI;
 
 namespace OsirisCmd.SettingsManager;
 
 public class SettingsProviderService : ISettingsProviderService
 {
-    private const string SettingsFileName = "settings.json";
+    private readonly ILoggerService _logger;
 
-    // private static SettingsProvider? _instance;
+    private string SettingsFileName = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/OsirisCmd/appdata/settings.json";
 
-    private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions()
+    private readonly JsonSerializerOptions _serializerOptions = new()
     {
         WriteIndented = true,
         Converters = { new SettingsItemConverter() }
@@ -26,29 +27,29 @@ public class SettingsProviderService : ISettingsProviderService
 
     public SettingsProviderService()
     {
-        // _instance = this;
+        _logger = ServiceLocator.GetService<ILoggerService>();
         LoadSettings();
         
         SettingChangedEvent.SettingChanged += (changedSetting) =>
         {
-            Log.Debug("Settings changed {ChangedSetting}", changedSetting);
+            _logger.LogDebug($"Settings changed {changedSetting}");
             SaveSettings();
         };
     }
 
     private void LoadSettings()
     {
-        Log.Debug("Loading settings");
+        _logger.LogDebug("Loading settings");
         if (!File.Exists(SettingsFileName))
         {
-            Log.Debug("Settings file does not exist. Creating new one.");
+            _logger.LogDebug("Settings file does not exist. Creating new one.");
             SaveSettings();
         }
 
         var json = File.ReadAllText(SettingsFileName);
-        Log.Debug("Settings file loaded: {Json}", json);
+        _logger.LogDebug($"Settings file loaded: {json}");
         var parsed = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json, _serializerOptions);
-        Log.Debug("Settings parsed: {Parsed}", parsed);
+        _logger.LogDebug($"Settings parsed: {parsed}");
 
         if (parsed == null) return;
         foreach (var (key, value) in parsed)
@@ -67,19 +68,19 @@ public class SettingsProviderService : ISettingsProviderService
 
         var json = JsonSerializer.Serialize(jsonDictionary, _serializerOptions);
 
-        Log.Debug("Saving settings: {Json}", json);
+        _logger.LogDebug($"Saving settings: {json}");
         File.WriteAllText(SettingsFileName, json);
     }
     
     public void RegisterUIComponent(string sectionName, Func<UserControl> uiComponent)
     {
-        Log.Debug("Register UI for {SectionName}", sectionName);
+        _logger.LogDebug($"Register UI for {sectionName}");
         UIComponents[sectionName] = uiComponent;
     }
 
     public T? AttachSettings<T>() where T : class, ISettings, new()
     {
-        Log.Debug("Attach settings for {SectionName}", typeof(T).Name);
+        _logger.LogDebug($"Attach settings for {typeof(T).Name}");
         var sectionName = typeof(T).Name;
         if (SettingsSections.TryGetValue(sectionName, out var settingsSection))
         {

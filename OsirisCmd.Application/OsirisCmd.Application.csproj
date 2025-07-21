@@ -30,6 +30,7 @@
     <ProjectReference Include="..\OsirisCmd.SearchingEngine\OsirisCmd.SearchingEngine.csproj" />
     <ProjectReference Include="..\OsirisCmd.SettingsManager\OsirisCmd.SettingsManager.csproj" />
     <ProjectReference Include="..\OsirisCmd.DI\OsirisCmd.DI.csproj" />
+    <ProjectReference Include="..\OsirisCmd.Logger\OsirisCmd.Logger.csproj" />
   </ItemGroup>
 
   <Target Name="CreatePluginsFolder" AfterTargets="AfterBuild">
