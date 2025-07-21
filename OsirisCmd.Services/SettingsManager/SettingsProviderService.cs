@@ -27,7 +27,7 @@ public class SettingsProviderService : ISettingsProviderService
 
     public SettingsProviderService()
     {
-        _logger = ServiceLocator.GetService<ILoggerService>();
+        // TODO: Add link to logger service
         LoadSettings();
         
         SettingChangedEvent.SettingChanged += (changedSetting) =>

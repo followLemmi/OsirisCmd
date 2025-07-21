@@ -10,9 +10,4 @@
     <PackageReference Include="Avalonia" Version="11.2.6" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\OsirisCmd.DI\OsirisCmd.DI.csproj" />
-    <ProjectReference Include="..\OsirisCmd.Logger\OsirisCmd.Logger.csproj" />
-  </ItemGroup>
-
 </Project>

@@ -1,7 +1,8 @@
 ﻿using Avalonia.Collections;
 using Avalonia.Controls;
+using OsirisCmd.SettingsManager;
 
-namespace OsirisCmd.SettingsManager;
+namespace OsirisCmd.Core.SettingsManager;
 
 public interface ISettingsProviderService
 {

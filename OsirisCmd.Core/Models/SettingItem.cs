@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using OsirisCmd.SettingsManager.Converters;
 
-namespace OsirisCmd.SettingsManager;
+namespace OsirisCmd.SettingsManager.Models;
 
 [JsonConverter(typeof(SettingsItemConverter))]
 public class SettingItem : INotifyPropertyChanged
