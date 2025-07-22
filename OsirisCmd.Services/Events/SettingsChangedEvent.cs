@@ -1,6 +1,4 @@
-using Serilog;
-
-namespace OsirisCmd.SettingsManager.Events;
+namespace OsirisCmd.Services.Events;
 
 public static class SettingChangedEvent
 {
@@ -9,7 +7,6 @@ public static class SettingChangedEvent
 
     public static void Invoke(object? settingItem)
     {
-        Log.Debug("Invoke Event --- SettingChangedEvent");
         SettingChanged!.Invoke(settingItem);
     }
 }

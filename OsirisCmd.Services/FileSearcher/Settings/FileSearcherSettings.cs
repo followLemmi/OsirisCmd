@@ -1,9 +1,10 @@
-﻿using System.Collections;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
-using OsirisCmd.SettingsManager;
+using OsirisCmd.Core.Models;
+using OsirisCmd.Core.SettingsManager;
+using OsirisCmd.SearchingEngine.Settings;
 
-namespace OsirisCmd.SearchingEngine.Settings;
+namespace OsirisCmd.Services.FileSearcher.Settings;
 
 public class FileSearcherSettings : ISettings
 {

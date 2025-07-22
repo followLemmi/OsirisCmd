@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using Avalonia.Collections;
 using Avalonia.Controls;
+using OsirisCmd.Core.SettingsManager;
 using OsirisCmd.DI;
-using OsirisCmd.SettingsManager;
 
 namespace Application.ViewModels;
 

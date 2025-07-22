@@ -1,9 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using OsirisCmd.SearchingEngine.ViewModels;
 
-namespace OsirisCmd.SearchingEngine.Components;
+namespace OsirisCmd.UI.FileSearcher;
 
 public partial class FileSearcherSettingsComponent : UserControl
 {

@@ -2,10 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:OsirisCmd.SearchingEngine.ViewModels"
-             xmlns:templates="clr-namespace:OsirisCmd.SearchingEngine.Components.Templates"
+             xmlns:templates="clr-namespace:OsirisCmd.UI.FileSearcher.Templates"
+             xmlns:viewModels="clr-namespace:OsirisCmd.UI.FileSearcher.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="OsirisCmd.SearchingEngine.Components.FileSearcherSettingsComponent"
+             x:Class="OsirisCmd.UI.FileSearcher.FileSearcherSettingsComponent"
              x:DataType="viewModels:FileSearcherSettingsViewModel">
 
     <UserControl.DataContext>

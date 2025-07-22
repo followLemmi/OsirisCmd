@@ -3,18 +3,19 @@ using Lucene.Net.Analysis.Standard;
 using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
-using OsirisCmd.SearchingEngine.Components;
-using OsirisCmd.SearchingEngine.Settings;
-using OsirisCmd.SettingsManager;
+using OsirisCmd.Core.FileSearcher;
+using OsirisCmd.Core.Models;
+using OsirisCmd.Core.SettingsManager;
+using OsirisCmd.Services.FileSearcher.Settings;
 using Serilog;
 
-namespace OsirisCmd.SearchingEngine;
+namespace OsirisCmd.Services.FileSearcher;
 
 public class FileSearcherService : IFileSearcherService
 {
     private ConcurrentQueue<string> _filesToIndex = new();
     
-    private readonly SearchingEngine _searchingEngine;
+    private readonly SearchingEngine.SearchingEngine _searchingEngine;
     private readonly QueryParser _fileNameParser;
     private readonly QueryParser _fileContentParser;
     private readonly MultiFieldQueryParser _multiFieldParser;
@@ -23,9 +24,8 @@ public class FileSearcherService : IFileSearcherService
     
     public FileSearcherService(ISettingsProviderService? settingsProvider)
     {
-        settingsProvider!.RegisterUIComponent("FileSearching", () => new FileSearcherSettingsComponent());
         _settings = settingsProvider.AttachSettings<FileSearcherSettings>();
-        _searchingEngine = new SearchingEngine(_settings.GetPathToIndexes());
+        _searchingEngine = new SearchingEngine.SearchingEngine(_settings.GetPathToIndexes());
         var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);

@@ -1,7 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using OsirisCmd.Core.Models;
 
-namespace OsirisCmd.SettingsManager.Converters;
+namespace OsirisCmd.Core.Converters;
 
 public class SettingsItemConverter : JsonConverter<SettingItem>
 {

@@ -4,10 +4,12 @@ using Application.Views;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
+using OsirisCmd.Core.FileSearcher;
+using OsirisCmd.Core.SettingsManager;
 using OsirisCmd.Logger;
 using OsirisCmd.DI;
-using OsirisCmd.SearchingEngine;
-using OsirisCmd.SettingsManager;
+using OsirisCmd.Services.FileSearcher;
+using OsirisCmd.Services.SettingsManager;
 
 namespace Application;
 

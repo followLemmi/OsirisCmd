@@ -4,9 +4,9 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using OsirisCmd.SearchingEngine.Settings;
-using OsirisCmd.SettingsManager.Events;
+using OsirisCmd.Services.Events;
 
-namespace OsirisCmd.SearchingEngine.Components.Templates;
+namespace OsirisCmd.UI.FileSearcher.Templates;
 
 public class DrivesToIndexTemplate : IDataTemplate
 {

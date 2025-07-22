@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OsirisCmd.Core\OsirisCmd.Core.csproj" />
+    <ProjectReference Include="..\OsirisCmd.SearchingEngine\OsirisCmd.SearchingEngine.csproj" />
   </ItemGroup>
 
 

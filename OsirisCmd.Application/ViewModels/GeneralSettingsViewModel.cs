@@ -1,6 +1,6 @@
 ﻿using Application.Settings;
+using OsirisCmd.Core.SettingsManager;
 using OsirisCmd.DI;
-using OsirisCmd.SettingsManager;
 
 namespace Application.ViewModels;
 

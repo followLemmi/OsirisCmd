@@ -1,4 +1,4 @@
-namespace OsirisCmd.SearchingEngine;
+namespace OsirisCmd.Core.Models;
 
 public class SearchResult
 {

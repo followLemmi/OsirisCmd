@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OsirisCmd.SearchingEngine\OsirisCmd.SearchingEngine.csproj" />
+    <ProjectReference Include="..\OsirisCmd.Services\OsirisCmd.Services.csproj" />
     <ProjectReference Include="..\OsirisCmd.SettingsManager\OsirisCmd.SettingsManager.csproj" />
     <ProjectReference Include="..\OsirisCmd.DI\OsirisCmd.DI.csproj" />
     <ProjectReference Include="..\OsirisCmd.Logger\OsirisCmd.Logger.csproj" />
@@ -36,10 +37,4 @@
   <Target Name="CreatePluginsFolder" AfterTargets="AfterBuild">
     <MakeDir Directories="$(OutputPath)plugins" />
   </Target>
-  
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>

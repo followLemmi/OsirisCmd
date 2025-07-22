@@ -4,7 +4,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
-using OsirisCmd.SettingsManager;
+using OsirisCmd.Core.Models;
 
 namespace Application.Components.Templates;
 

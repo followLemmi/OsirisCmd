@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Runtime.InteropServices;
-using OsirisCmd.SettingsManager;
+﻿using System.Collections.ObjectModel;
+using OsirisCmd.Core.Models;
+using OsirisCmd.Core.SettingsManager;
 
 namespace Application.Settings;
 

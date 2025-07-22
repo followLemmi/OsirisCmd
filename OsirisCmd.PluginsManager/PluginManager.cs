@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Reflection;
 using OsirisCmd.PluginsAPI;
-using OsirisCmd.SettingsManager;
 
 namespace OsirisCmd.PluginsManager;
 

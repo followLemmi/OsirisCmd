@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
+using OsirisCmd.Core.Models;
 
-namespace OsirisCmd.SettingsManager;
+namespace OsirisCmd.Core.SettingsManager;
 
 public interface ISettings
 {

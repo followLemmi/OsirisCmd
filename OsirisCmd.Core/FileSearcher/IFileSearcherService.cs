@@ -1,4 +1,6 @@
-﻿namespace OsirisCmd.SearchingEngine;
+﻿using OsirisCmd.Core.Models;
+
+namespace OsirisCmd.Core.FileSearcher;
 
 public interface IFileSearcherService
 {
