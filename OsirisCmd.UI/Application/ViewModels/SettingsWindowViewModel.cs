@@ -12,16 +12,17 @@ public class SettingsWindowViewModel
 
     public SettingsWindowViewModel()
     {
-        var settingsProviderService = UIServiceProviderAdapter.ServiceProvider.GetRequiredService<ISettingsProviderService>();
-        Tabs = [];
-        foreach (var settingTab in settingsProviderService.UIComponents)
-        {
-            Tabs.Add(new TabItem()
-            {
-                Header = settingTab.Key,
-                Content = settingTab.Value()
-            });
-        }
+        // TODO: Rewrite to new settings UI
+        // var settingsProviderService = UIServiceProviderAdapter.ServiceProvider.GetRequiredService<ISettingsProviderService>();
+        // Tabs = [];
+        // foreach (var settingTab in settingsProviderService.UIComponents)
+        // {
+        //     Tabs.Add(new TabItem()
+        //     {
+        //         Header = settingTab.Key,
+        //         Content = settingTab.Value()
+        //     });
+        // }
     }
     
 }

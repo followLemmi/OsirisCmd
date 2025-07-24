@@ -5,6 +5,7 @@ using Lucene.Net.Search;
 using Lucene.Net.Util;
 using OsirisCmd.Core.Models;
 using OsirisCmd.Core.Services.FileSearcher;
+using OsirisCmd.Core.Services.Logger;
 using OsirisCmd.Core.Services.SettingsManager;
 using OsirisCmd.Services.Services.FileSearcher.Settings;
 using Serilog;
@@ -13,6 +14,8 @@ namespace OsirisCmd.Services.Services.FileSearcher;
 
 public class FileSearcherService : IFileSearcherService
 {
+    private ILoggerService _logger;
+
     private ConcurrentQueue<string> _filesToIndex = new();
     
     private readonly SearchingEngine.SearchingEngine _searchingEngine;
@@ -22,10 +25,11 @@ public class FileSearcherService : IFileSearcherService
 
     private readonly FileSearcherSettings? _settings;
     
-    public FileSearcherService(ISettingsProviderService? settingsProvider)
+    public FileSearcherService(ILoggerService logger, ISettingsProviderService? settingsProvider)
     {
-        _settings = settingsProvider.AttachSettings<FileSearcherSettings>();
-        _searchingEngine = new SearchingEngine.SearchingEngine(_settings.GetPathToIndexes());
+        _logger = logger;
+        _settings = settingsProvider!.AttachSettings<FileSearcherSettings>();
+        _searchingEngine = new SearchingEngine.SearchingEngine(_settings!.GetPathToIndexes());
         var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);

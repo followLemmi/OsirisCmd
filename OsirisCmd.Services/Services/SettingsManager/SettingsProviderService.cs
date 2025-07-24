@@ -1,14 +1,16 @@
 ﻿using System.Text.Json;
 using Avalonia.Collections;
-using Avalonia.Controls;
 using OsirisCmd.Core.Converters;
 using OsirisCmd.Core.Services.SettingsManager;
 using OsirisCmd.Services.Events;
+using OsirisCmd.Core.Services.Logger;
 
 namespace OsirisCmd.Services.Services.SettingsManager;
 
 public class SettingsProviderService : ISettingsProviderService
 {
+    private ILoggerService _logger;
+
     private string SettingsFileName = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/OsirisCmd/appdata/settings.json";
 
     private readonly JsonSerializerOptions _serializerOptions = new()
@@ -18,12 +20,12 @@ public class SettingsProviderService : ISettingsProviderService
     };
 
     private AvaloniaDictionary<string, ISettings> SettingsSections { get; } = new();
-    public AvaloniaDictionary<string, Func<UserControl>> UIComponents { get; } = new();
     private Dictionary<string, JsonElement> PendingSettings { get; } = new();
 
-    public SettingsProviderService()
+    public SettingsProviderService(ILoggerService logger)
     {
-        // TODO: Add link to logger service
+        _logger = logger;
+
         LoadSettings();
         
         SettingChangedEvent.SettingChanged += (changedSetting) =>
@@ -34,8 +36,10 @@ public class SettingsProviderService : ISettingsProviderService
 
     private void LoadSettings()
     {
+        _logger.LogDebug("Start loading application settings");
         if (!File.Exists(SettingsFileName))
         {
+            _logger.LogDebug("Settings file not exist. Create default.");
             SaveSettings();
         }
 
@@ -47,10 +51,12 @@ public class SettingsProviderService : ISettingsProviderService
         {
             PendingSettings[key] = value;
         }
+        _logger.LogDebug($"Loaded settings:\n{json}");
     }
 
     private void SaveSettings()
     {
+        _logger.LogDebug("Save settings called");
         var jsonDictionary = new Dictionary<string, object>();
         foreach (var (key, settingsSection) in SettingsSections)
         {
@@ -61,15 +67,11 @@ public class SettingsProviderService : ISettingsProviderService
 
         File.WriteAllText(SettingsFileName, json);
     }
-    
-    public void RegisterUIComponent(string sectionName, Func<UserControl> uiComponent)
-    {
-        UIComponents[sectionName] = uiComponent;
-    }
 
     public T? AttachSettings<T>() where T : class, ISettings, new()
     {
         var sectionName = typeof(T).Name;
+        _logger.LogDebug($"SettingsAttach requested for {sectionName}");
         if (SettingsSections.TryGetValue(sectionName, out var settingsSection))
         {
             return settingsSection as T;
