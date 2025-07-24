@@ -6,9 +6,9 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
 using OsirisCmd.Core.Models;
-using OsirisCmd.SearchingEngine.Converters;
 using OsirisCmd.Services.Events;
 using OsirisCmd.Services.Services.FileSearcher.Settings;
+using OsirisCmd.UI.Converters;
 
 namespace OsirisCmd.UI.Settings.FileSearcher.Templates;
 

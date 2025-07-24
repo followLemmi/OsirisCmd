@@ -8,10 +8,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OsirisCmd.Core\OsirisCmd.Core.csproj" />
-    <ProjectReference Include="..\OsirisCmd.SearchingEngine\OsirisCmd.SearchingEngine.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00017" />
+    <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00017" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0-preview.5.25277.114" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />

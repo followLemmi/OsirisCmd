@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Avalonia.Collections;
 using OsirisCmd.Core.Converters;
 using OsirisCmd.Core.Services.SettingsManager;
 using OsirisCmd.Services.Events;
@@ -19,7 +18,7 @@ public class SettingsProviderService : ISettingsProviderService
         Converters = { new SettingsItemConverter() }
     };
 
-    private AvaloniaDictionary<string, ISettings> SettingsSections { get; } = new();
+    private Dictionary<string, ISettings> SettingsSections { get; } = new();
     private Dictionary<string, JsonElement> PendingSettings { get; } = new();
 
     public SettingsProviderService(ILoggerService logger)
