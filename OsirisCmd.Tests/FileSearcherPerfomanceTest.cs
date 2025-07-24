@@ -1,6 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using OsirisCmd.SearchingEngine;
-using OsirisCmd.SettingsManager;
 using Xunit.Abstractions;
 
 namespace OsirisCmd.Tests;

@@ -1,46 +1,63 @@
 ﻿using System;
 using Avalonia;
-using Microsoft.Extensions.Configuration;
-using Serilog;
+using System.IO;
+using Microsoft.Extensions.DependencyInjection;
+using OsirisCmd.Core.Services.Logger;
+using OsirisCmd.Services;
+using OsirisCmd.UI;
 
 namespace Application;
 
 class Program
 {
+    private static ILoggerService _logger;
+
     [STAThread]
     public static void Main(string[] args)
     {
-        // Настройка конфигурации
-        var configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .Build();
+        MainServiceProvider.Build();
         
-        // Настройка статического Serilog логгера
-        Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration)
-            .CreateLogger();
-
+        UIServiceProviderAdapter.InjectMainServiceProvider(MainServiceProvider.ServiceProvider);
+        
+        _logger = MainServiceProvider.ServiceProvider.GetRequiredService<ILoggerService>();
         try
         {
-            Log.Information("Starting OsirisCmd application");
+            CreateApplicationFolders();
 
             BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Log.Fatal(ex, "Application terminated unexpectedly");
-        }
-        finally
-        {
-            Log.CloseAndFlush();
+            _logger.LogFatal("Fatal exception on start application", e);
         }
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.
-    public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
+    private static AppBuilder BuildAvaloniaApp()
+    {
+        return AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
+    }
+
+
+    private static void CreateApplicationFolders()
+    {
+        _logger.LogDebug("Create startup folders");
+        var applicationLocalAppDataPath =
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/OsirisCmd";
+        if (!Directory.Exists(applicationLocalAppDataPath))
+        {
+            _logger.LogDebug($"Create application local app data folder {applicationLocalAppDataPath}");
+            Directory.CreateDirectory(applicationLocalAppDataPath);
+        }
+
+        if (!Directory.Exists(applicationLocalAppDataPath + "/appdata"))
+        {
+            _logger.LogDebug($"Create application local app data folder {applicationLocalAppDataPath}/appdata");
+            Directory.CreateDirectory(applicationLocalAppDataPath + "/appdata");
+        }
+    }
 }
