@@ -22,8 +22,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\OsirisCmd.SearchingEngine\OsirisCmd.SearchingEngine.csproj" />
-  </ItemGroup>
-
 </Project>

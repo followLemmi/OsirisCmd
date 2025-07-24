@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using Avalonia.Data.Converters;
 
-namespace OsirisCmd.SearchingEngine.Converters;
+namespace OsirisCmd.UI.Converters;
 
 public class StringListConverter : IValueConverter
 {
