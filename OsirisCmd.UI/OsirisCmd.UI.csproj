@@ -11,21 +11,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Application\" />
+      <Folder Include="Application\MainWindow\" />
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Application\Views\MainMenuControl.axaml" />
-      <AdditionalFiles Include="Application\Views\MainWindow.axaml" />
-      <AdditionalFiles Include="Application\Views\SettingsWindow.axaml" />
-      <AdditionalFiles Include="Settings\FileSearcher\FileSearcherSettingsComponent.axaml" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Update="Settings\GeneralSettings\GeneralSettingsComponent.axaml.cs">
-        <DependentUpon>GeneralSettingsComponent.axaml</DependentUpon>
-        <SubType>Code</SubType>
-      </Compile>
+      <AdditionalFiles Include="Application\Settings\GeneralSettings\GeneralSettingsComponent.axaml" />
     </ItemGroup>
 
     <ItemGroup>

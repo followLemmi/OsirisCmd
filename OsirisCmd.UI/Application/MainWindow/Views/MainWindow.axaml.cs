@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace OsirisCmd.UI.Application.Views;
+namespace OsirisCmd.UI.Application.MainWindow.Views;
 
 public partial class MainWindow : Window
 {
