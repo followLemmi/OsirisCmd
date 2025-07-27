@@ -6,7 +6,7 @@ using Avalonia.Layout;
 using OsirisCmd.Services.Events;
 using OsirisCmd.Services.Services.FileSearcher.Settings;
 
-namespace OsirisCmd.UI.Settings.FileSearcher.Templates;
+namespace OsirisCmd.UI.Application.Settings.FileSearcher.Templates;
 
 public class DrivesToIndexTemplate : IDataTemplate
 {

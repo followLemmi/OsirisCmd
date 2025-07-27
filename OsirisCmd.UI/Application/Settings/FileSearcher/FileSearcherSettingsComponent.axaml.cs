@@ -1,7 +1,6 @@
 ﻿using Avalonia.Controls;
-using OsirisCmd.UI.Settings.FileSearcher.ViewModels;
 
-namespace OsirisCmd.UI.Settings.FileSearcher;
+namespace OsirisCmd.UI.Application.Settings.FileSearcher;
 
 public partial class FileSearcherSettingsComponent : UserControl
 {

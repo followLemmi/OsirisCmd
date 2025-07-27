@@ -2,7 +2,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using OsirisCmd.Core.Services.FileSearcher;
-using OsirisCmd.UI.Application.Views;
+using OsirisCmd.UI.Application.MainWindow.Views;
 
 namespace Application;
 
