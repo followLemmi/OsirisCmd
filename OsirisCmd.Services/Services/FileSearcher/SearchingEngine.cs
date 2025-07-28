@@ -25,9 +25,9 @@ public class SearchingEngine
     private IndexSearcher? _indexSearcher;
     private List<FileInfo> _files = [];
 
-    public SearchingEngine(ISettingsProviderService settingsProvider)
+    public SearchingEngine(FileSearcherSettings fileSearcherSettings)
     {
-        _settings = settingsProvider.AttachSettings<FileSearcherSettings>();
+        _settings = fileSearcherSettings;
         _indexPath = _settings.GetPathToIndexes();
         _analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         InitializeIndex();

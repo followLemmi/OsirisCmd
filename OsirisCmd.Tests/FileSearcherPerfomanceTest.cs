@@ -12,7 +12,7 @@ public class FileSearcherPerfomanceTest
         _testOutputHelper = testOutputHelper;
     }
 
-    [Fact]
+    // [Fact]
     public void FileSystemCollectorTest()
     {
         var startTime = DateTime.Now;

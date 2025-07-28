@@ -14,9 +14,7 @@ namespace OsirisCmd.Services.Services.FileSearcher;
 
 public class FileSearcherService : IFileSearcherService
 {
-    private ILoggerService _logger;
-
-    private ConcurrentQueue<string> _filesToIndex = new();
+    private readonly ILoggerService _logger;
     
     private readonly SearchingEngine.SearchingEngine _searchingEngine;
     private readonly QueryParser _fileNameParser;
@@ -25,16 +23,21 @@ public class FileSearcherService : IFileSearcherService
 
     private readonly FileSearcherSettings? _settings;
     
-    public FileSearcherService(ILoggerService logger, ISettingsProviderService? settingsProvider)
+    public FileSearcherService(ILoggerService logger, ISettingsProviderService settingsProvider)
     {
+        ArgumentNullException.ThrowIfNull(settingsProvider);
         _logger = logger;
-        _searchingEngine = new SearchingEngine.SearchingEngine(settingsProvider);
+        _settings = settingsProvider!.AttachSettings<FileSearcherSettings>();
+        _searchingEngine = new SearchingEngine.SearchingEngine(_settings!);
         var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);
         _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);
         _multiFieldParser = new MultiFieldQueryParser(LuceneVersion.LUCENE_48, ["fileName", "content"], analyzer);
 
-        _searchingEngine.StartupIndexing();
+        if (_settings != null && _settings.IsFileIndexingEnabled())
+        {
+            _searchingEngine.StartupIndexing();
+        }
     }
 
     public List<SearchResult> SearchByFileName(string fileName, int maxResults = 100)

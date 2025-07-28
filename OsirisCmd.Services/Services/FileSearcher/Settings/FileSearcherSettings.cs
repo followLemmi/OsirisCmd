@@ -24,8 +24,8 @@ public class FileSearcherSettings : ISettings
         },
         new()
         {
-        Name = "DrivesToIndex",
-        Value = GetDefaultDrivesToIndex()
+            Name = "DrivesToIndex",
+            Value = GetDefaultDrivesToIndex()!
         },
         new()
         {
@@ -42,14 +42,24 @@ public class FileSearcherSettings : ISettings
                             Name = "Linux",
                             Value = new List<string>()
                             {
+                                "/bin",
+                                "/boot",
+                                "/dev",
+                                "/lib",
+                                "/lib64",
                                 "/proc",
+                                "/run",
+                                "/sbin",
                                 "/sys",
                                 "/snap",
-                                "/boot",
-                                "/bin/X11",
-                                "/usr/bin/X11",
+                                "/flatpack",
+                                "/var/lock",
+                                "/var/run",
+                                "/var/tmp",
+                                "/var/opt",
                                 "/var/lib",
-                                "/dev"
+                                "/var/spool",
+                                "/var/cache"
                             }
                         },
                         new()
