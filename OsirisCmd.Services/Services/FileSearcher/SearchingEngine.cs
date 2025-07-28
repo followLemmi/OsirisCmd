@@ -1,4 +1,5 @@
-﻿using System.Reflection.Metadata;
+﻿using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
@@ -6,13 +7,12 @@ using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
 using OsirisCmd.Core.Models;
-using OsirisCmd.Core.Services.SettingsManager;
 using OsirisCmd.Services.Services.FileSearcher.Settings;
 using Serilog;
 using Directory = System.IO.Directory;
 using Document = Lucene.Net.Documents.Document;
 
-namespace OsirisCmd.SearchingEngine;
+namespace OsirisCmd.Services.Services.FileSearcher;
 
 public class SearchingEngine
 {
@@ -32,7 +32,7 @@ public class SearchingEngine
         _analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
         InitializeIndex();
     }
-    
+
     public void IndexFile(string filePath, string content)
     {
         var document = new Document();
@@ -42,21 +42,21 @@ public class SearchingEngine
         {
             return;
         }
-        
+
         document.Add(new StringField("fullPath", filePath, Field.Store.YES));
         document.Add(new TextField("fileName", fileInfo.Name, Field.Store.YES));
         document.Add(new TextField("fileNameNoExt", Path.GetFileNameWithoutExtension(filePath), Field.Store.NO));
         document.Add(new TextField("extension", fileInfo.Extension.ToLower(), Field.Store.YES));
         document.Add(new TextField("directory", fileInfo.DirectoryName, Field.Store.NO));
-        
+
         if (!string.IsNullOrEmpty(content))
         {
             document.Add(new TextField("content", content, Field.Store.NO));
         }
-        
+
         document.Add(new Int64Field("fileSize", fileInfo.Length, Field.Store.YES));
         document.Add(new Int64Field("lastModified", fileInfo.LastWriteTime.Ticks, Field.Store.YES));
-        
+
         var term = new Term("fullPath", filePath);
         _indexWriter.UpdateDocument(term, document);
     }
@@ -68,6 +68,7 @@ public class SearchingEngine
         {
             return true;
         }
+
         return searcher.IndexReader.NumDocs == 0;
     }
 
@@ -77,6 +78,7 @@ public class SearchingEngine
         {
             RefreshSearcher();
         }
+
         return _indexSearcher;
     }
 
@@ -106,7 +108,7 @@ public class SearchingEngine
         _indexWriter = new IndexWriter(directory, config);
     }
 
-    
+
     private void EnsureIndexDirectoryIsAccessible(string indexPath)
     {
         var lockFilePath = Path.Combine(indexPath, "write.lock");
@@ -122,7 +124,7 @@ public class SearchingEngine
             }
         }
     }
-    
+
     private void RefreshSearcher()
     {
         _directoryReader?.Dispose();
@@ -137,18 +139,18 @@ public class SearchingEngine
             _indexSearcher = null;
         }
     }
-    
-    
+
+
     public List<SearchResult> ExecuteSearch(Query query, int maxResults)
     {
         var results = new List<SearchResult>();
-        
+
         var searcher = GetSearcher();
         if (searcher == null)
         {
             return results;
         }
-        
+
         var topDocs = searcher.Search(query, maxResults);
         foreach (var scoreDoc in topDocs.ScoreDocs)
         {
@@ -163,10 +165,49 @@ public class SearchingEngine
                 Score = scoreDoc.Score
             });
         }
+
         return results.OrderByDescending(x => x.Score).ToList();
     }
-    
-    
+
+    private void GetAllFilesRecursiveBlocking(BlockingCollection<string> filesCollection, string directoryPath,
+        CancellationToken cancellationToken)
+    {
+        var queue = new Queue<string>();
+        queue.Enqueue(directoryPath);
+
+        while (queue.Count > 0 && !cancellationToken.IsCancellationRequested)
+        {
+            var currentDirectory = queue.Dequeue();
+
+            var dirInfo = new DirectoryInfo(currentDirectory);
+            if (dirInfo.Attributes.HasFlag(FileAttributes.ReparsePoint) ||
+                ShouldSkipDirectory(currentDirectory) ||
+                !HasDirectoryAccess(currentDirectory))
+            {
+                continue;
+            }
+
+            try
+            {
+                // Добавляем файлы в коллекцию
+                foreach (var file in Directory.EnumerateFiles(currentDirectory))
+                {
+                    filesCollection.Add(file, cancellationToken);
+                }
+
+                // Добавляем поддиректории для обработки
+                foreach (var subdirectory in Directory.EnumerateDirectories(currentDirectory))
+                {
+                    queue.Enqueue(subdirectory);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error processing directory {currentDirectory}: {ex.Message}");
+            }
+        }
+    }
+
     public async void StartupIndexing()
     {
         try
@@ -174,30 +215,89 @@ public class SearchingEngine
             var startTimestamp = DateTime.Now;
             var tasks = new List<Task>();
             var drivesToIndex = GetDrivesToIndex();
-            var allFiles = new List<string>();
-            try
-            {
-                tasks.AddRange(drivesToIndex.Select(rootPath => Task.Run(() => { allFiles.AddRange(GetAllFilesRecursive(rootPath)); })));
+            var allFiles = new ConcurrentQueue<string>();
+            var latch = new CountdownEvent(1);
 
-                await Task.WhenAll(tasks);
-            
-                const int batchSize = 1000;
-                var batches = allFiles
-                    .Select((file, index) => new { file, index })
-                    .GroupBy(x => x.index / batchSize)
-                    .Select(g => g.Select(x => x.file).ToList())
-                    .ToList();
-            
-                tasks = batches.Select(batch => Task.Run(() => IndexFilesBatch(batch))).ToList();
-                await Task.WhenAll(tasks);
-            }
-            catch (Exception ex)
+
+            // BlockingCollection автоматически управляет синхронизацией
+            using var filesCollection = new BlockingCollection<string>(1000); // Ограничиваем размер буфера
+
+            using var cts = new CancellationTokenSource();
+
+            // Запускаем задачи сбора файлов
+            var collectingTask = Task.Run(async () =>
             {
-                Console.WriteLine($"Error while indexing: {ex.Message}");
-            }
+                var collectingTasks = drivesToIndex.Select(rootPath =>
+                        Task.Run(() => GetAllFilesRecursiveBlocking(filesCollection, rootPath, cts.Token), cts.Token))
+                    .ToArray();
+
+                await Task.WhenAll(collectingTasks);
+                filesCollection.CompleteAdding(); // Сигнализируем о завершении добавления
+            });
+
+            // Запускаем задачи индексации
+            const int indexingThreads = 12;
+            var indexingTasks = Enumerable.Range(0, indexingThreads)
+                .Select(_ => Task.Run(() =>
+                {
+                    foreach (var file in filesCollection.GetConsumingEnumerable(cts.Token))
+                    {
+                        try
+                        {
+                            IndexSingleFile(file);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error indexing file {file}: {ex.Message}");
+                        }
+                    }
+                }, cts.Token)).ToArray();
+
+            // Ждем завершения всех задач
+            await collectingTask;
+            await Task.WhenAll(indexingTasks);
+
+            // try
+            // {
+            //     tasks.AddRange(drivesToIndex.Select(rootPath => Task.Run(() => { GetAllFilesRecursive(allFiles, rootPath, latch); })));
+            //
+            //     // await Task.WhenAll(tasks);
+            //
+            //     // const int batchSize = 1000;
+            //     // var batches = allFiles
+            //     //     .Select((file, index) => new { file, index })
+            //     //     .GroupBy(x => x.index / batchSize)
+            //     //     .Select(g => g.Select(x => x.file).ToList())
+            //     //     .ToList();
+            //
+            //     
+            //     var indexTasks = new List<Task>();
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
+            //     // for (var i = 0; i < 50; i ++) {
+            //     // }
+            //     await Task.WhenAll(indexTasks);
+            // }
+            // catch (Exception ex)
+            // {
+            //     Console.WriteLine($"Error while indexing: {ex.Message}");
+            // }
 
             await Task.Run(() =>
             {
+                Console.WriteLine("Starting commit");
                 Commit();
                 var endTimestamp = DateTime.Now;
                 Console.WriteLine($"Indexing took {(endTimestamp - startTimestamp).TotalMinutes} minutes");
@@ -212,6 +312,15 @@ public class SearchingEngine
 
     private List<string> GetDrivesToIndex()
     {
+        //TODO: implement logic
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return new List<string>()
+            {
+                "/"
+            };
+        }
+
         var rootDirectoriesToIndex = new List<string>();
         var drives = DriveInfo.GetDrives();
         foreach (var drive in drives)
@@ -219,7 +328,8 @@ public class SearchingEngine
             var needToIndex = true;
             foreach (var settingDrive in _settings?.GetDrivesToIndex()!)
             {
-                if (settingDrive.Name.Equals(drive.Name, StringComparison.InvariantCultureIgnoreCase) && !settingDrive.Enabled)
+                if (settingDrive.Name.Equals(drive.Name, StringComparison.InvariantCultureIgnoreCase) &&
+                    !settingDrive.Enabled)
                 {
                     needToIndex = false;
                 }
@@ -230,41 +340,59 @@ public class SearchingEngine
                 rootDirectoriesToIndex.Add(drive.RootDirectory.FullName);
             }
         }
+
         return rootDirectoriesToIndex;
     }
 
-    private List<string> GetAllFilesRecursive(string directoryPath)
+    private void GetAllFilesRecursive(ConcurrentQueue<string> filesQueue, string directoryPath,
+        CountdownEvent countdownEvent)
     {
-        var allFiles = new List<string>();
         var queue = new Queue<string>();
         queue.Enqueue(directoryPath);
         while (queue.Count > 0)
         {
             var currentDirectory = queue.Dequeue();
-            if (ShouldSkipDirectory(currentDirectory) || !HasDirectoryAccess(currentDirectory))
+            var dirInfo = new DirectoryInfo(currentDirectory);
+            if (dirInfo.Attributes.HasFlag(FileAttributes.ReparsePoint) || ShouldSkipDirectory(currentDirectory) ||
+                !HasDirectoryAccess(currentDirectory))
             {
                 continue;
             }
-            
+
             var files = Directory.EnumerateFiles(currentDirectory);
-            allFiles.AddRange(files);
-            
+            // Task.Run(() =>
+            // {
+            // });
+
+            foreach (var file in files)
+            {
+                // var fileInfo = new FileInfo(file);
+                // if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                // {
+                //     continue;
+                // }
+                filesQueue.Enqueue(file);
+            }
+
             var subdirectories = Directory.EnumerateDirectories(currentDirectory);
             foreach (var subdirectory in subdirectories)
             {
                 queue.Enqueue(subdirectory);
             }
         }
-        return allFiles;
+
+        countdownEvent.Signal();
     }
 
-    private void IndexFilesBatch(List<string> files)
+    private void IndexFilesBatch(ConcurrentQueue<string> filesQueue, CountdownEvent countdownEvent)
     {
-        var parallelOption = new ParallelOptions()
+        while (countdownEvent.CurrentCount == 0 && filesQueue.Count != 0)
         {
-            MaxDegreeOfParallelism = 128
-        };
-        Parallel.ForEach(files, parallelOption, IndexSingleFile);
+            if (filesQueue.TryDequeue(out var file))
+            {
+                IndexSingleFile(file);
+            }
+        }
     }
 
     private void IndexSingleFile(string file)
@@ -274,13 +402,12 @@ public class SearchingEngine
         {
             return;
         }
-        
+
         Console.WriteLine($"Indexing {file}");
-        
+
         var content = GetFileContent(file);
 
         IndexFile(file, content);
-
     }
 
     private static bool HasDirectoryAccess(string directoryPath)
@@ -308,8 +435,9 @@ public class SearchingEngine
     {
         var fileName = Path.GetFileName(filePath);
         var extension = Path.GetExtension(filePath);
-        
-        if (!_settings!.GetReadContentExtensions().Contains(extension) || !_settings.GetReadContentFiles().Contains(fileName))
+
+        if (!_settings!.GetReadContentExtensions().Contains(extension) ||
+            !_settings.GetReadContentFiles().Contains(fileName))
         {
             return "";
         }
@@ -321,7 +449,7 @@ public class SearchingEngine
 
         return "";
     }
-    
+
     private static string ReadTextFileContent(string filePath)
     {
         try
@@ -334,7 +462,7 @@ public class SearchingEngine
             return "";
         }
     }
-    
+
     private static bool IsTextFile(string filePath, int sampleSize = 512)
     {
         try
@@ -342,14 +470,14 @@ public class SearchingEngine
             using var fileStream = File.OpenRead(filePath);
             var buffer = new byte[Math.Min(sampleSize, (int)fileStream.Length)];
             var bytesRead = fileStream.Read(buffer, 0, buffer.Length);
-            
+
             if (bytesRead == 0) return true;
-            
+
             for (var i = 0; i < bytesRead; i++)
             {
                 if (buffer[i] == 0) return false;
             }
-            
+
             var printableCount = 0;
             for (var i = 0; i < bytesRead; i++)
             {
@@ -359,7 +487,7 @@ public class SearchingEngine
                     printableCount++;
                 }
             }
-            
+
             var printableRatio = (double)printableCount / bytesRead;
             return printableRatio >= 0.95;
         }
@@ -372,7 +500,7 @@ public class SearchingEngine
     private static bool IsPrintableOrWhitespace(byte b)
     {
         return (b >= 32 && b <= 126) || //
-               b == 9 || 
+               b == 9 ||
                b == 10 ||
                b == 13 ||
                b >= 128;
@@ -383,5 +511,4 @@ public class SearchingEngine
         var fullPath = Path.GetFullPath(directoryPath);
         return _settings!.GetAllDirectoriesToSkip().Any(value => fullPath.Contains(value));
     }
-
 }

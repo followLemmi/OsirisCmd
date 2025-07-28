@@ -143,7 +143,13 @@ public class FileSearcherSettings : ISettings
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            return [];
+            return new List<DriveToIndex>
+            {
+                new DriveToIndex {
+                    Name = "/",
+                    Enabled = true
+                }
+            };
         }
 
         return DriveInfo.GetDrives().Select(drive => new DriveToIndex() { Name = drive.Name, Enabled = true, })
@@ -152,20 +158,7 @@ public class FileSearcherSettings : ISettings
 
     private static string GetDefaultOsSpecificPathToIndexes()
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            return "~/.config/osiris/indexes/";
-        }
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\OsirisCmd\\indexes\\";
-        }
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            return "~/Library/Preferences/OsirisCmd/indexes/";
-        }
-
-        return "";
+        return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\OsirisCmd\\indexes\\";
     }
 
     public bool IsFileIndexingEnabled()

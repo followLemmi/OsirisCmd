@@ -47,7 +47,7 @@ class Program
     {
         _logger.LogDebug("Create startup folders");
         var applicationLocalAppDataPath =
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/OsirisCmd";
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/OsirisCmd";
         if (!Directory.Exists(applicationLocalAppDataPath))
         {
             _logger.LogDebug($"Create application local app data folder {applicationLocalAppDataPath}");

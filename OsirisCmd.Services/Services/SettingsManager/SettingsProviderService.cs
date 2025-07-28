@@ -10,7 +10,7 @@ public class SettingsProviderService : ISettingsProviderService
 {
     private ILoggerService _logger;
 
-    private string SettingsFileName = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/OsirisCmd/appdata/settings.json";
+    private string SettingsFileName = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/OsirisCmd/appdata/settings.json";
 
     private readonly JsonSerializerOptions _serializerOptions = new()
     {
