@@ -7,7 +7,7 @@
         x:Class="OsirisCmd.UI.Application.MainWindow.Views.MainWindow"
         Title="OsirisCmd"
         x:Name="OsirisCmdMainWindow">
-
+    
     <DockPanel>
         <views:MainMenuControl DockPanel.Dock="Top"/>
         <TextBlock />

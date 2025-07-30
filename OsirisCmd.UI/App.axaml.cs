@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OsirisCmd.Core.Services.FileSearcher;
 using OsirisCmd.UI.Application.MainWindow.Views;
 
-namespace Application;
+namespace OsirisCmd.UI;
 
 public partial class App : Avalonia.Application
 {
@@ -21,7 +21,7 @@ public partial class App : Avalonia.Application
             var mainWindow = new MainWindow();
             desktop.MainWindow = mainWindow;
 
-            MainServiceProvider.ServiceProvider.GetRequiredService<IFileSearcherService>();
+            UIServiceProviderAdapter.ServiceProvider.GetRequiredService<IFileSearcherService>();
         }
 
         base.OnFrameworkInitializationCompleted();

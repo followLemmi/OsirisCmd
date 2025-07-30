@@ -58,6 +58,7 @@ public class FileSearcherService : IFileSearcherService
         {
             _logger.LogDebug($"Search by file content: {content}");
             var query = _fileContentParser.Parse(content);
+            Console.WriteLine(query);
             return _searchingEngine.ExecuteSearch(query, maxResults);
         }
         catch (Exception e)

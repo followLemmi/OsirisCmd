@@ -338,7 +338,7 @@ public class SearchingEngine
         var fileName = Path.GetFileName(filePath);
         var extension = Path.GetExtension(filePath);
 
-        if (!_settings!.GetReadContentExtensions().Contains(extension) ||
+        if (!_settings!.GetReadContentExtensions().Contains(extension) &&
             !_settings.GetReadContentFiles().Contains(fileName))
         {
             return "";

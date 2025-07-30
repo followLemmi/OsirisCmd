@@ -1,0 +1,23 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:OsirisCmd.UI.Application.FileSearcher"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+        x:Class="OsirisCmd.UI.Application.FileSearcher.FileSearcherWindow"
+        Title="Smart Search">
+
+    <Window.DataContext>
+        <viewModels:FileSearcherWindowViewModel />
+    </Window.DataContext>
+    
+    <DockPanel>
+        <Grid RowDefinitions="*,*">
+            <TextBox Grid.Row="0" Watermark="Type to search..." TextChanged="TextBox_OnTextChanged" Height="25" Margin="10,25,10,5" VerticalAlignment="Top"></TextBox>
+            <ListBox Grid.Row="1" ItemsSource="{Binding SearchResults}">
+                
+            </ListBox>
+        </Grid>
+    </DockPanel>
+
+</Window>

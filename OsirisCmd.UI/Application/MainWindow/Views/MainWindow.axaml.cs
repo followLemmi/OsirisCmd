@@ -1,4 +1,7 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using OsirisCmd.UI.Application.FileSearcher;
 
 namespace OsirisCmd.UI.Application.MainWindow.Views;
 
@@ -10,5 +13,22 @@ public partial class MainWindow : Window
         InitializeComponent();
     }
 
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        if (e.KeyModifiers == (KeyModifiers.Control | KeyModifiers.Shift) && e.Key == Key.F)
+        {
+            ShowFileSearcherWindow();
+            e.Handled = true;
+            return;
+        }
+        base.OnKeyDown(e);
+    }
+    
+    private AvaloniaObject ShowFileSearcherWindow()
+    {
+        var fileSearcherWindow = new FileSearcherWindow();
+        fileSearcherWindow.ShowDialog(this);
+        return fileSearcherWindow;
+    }
     
 }
