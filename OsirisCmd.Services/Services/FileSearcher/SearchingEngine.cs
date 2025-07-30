@@ -20,10 +20,12 @@ public class SearchingEngine
 
     private readonly string _indexPath;
     private readonly StandardAnalyzer _analyzer;
-    private IndexWriter _indexWriter;
+    private IndexWriter? _indexWriter;
     private DirectoryReader? _directoryReader;
     private IndexSearcher? _indexSearcher;
-    private List<FileInfo> _files = [];
+    
+    // Debug purposes
+    private readonly List<DirectoryInfo> _skippedDirectories = [];
 
     public SearchingEngine(FileSearcherSettings fileSearcherSettings)
     {
@@ -72,7 +74,7 @@ public class SearchingEngine
         return searcher.IndexReader.NumDocs == 0;
     }
 
-    public IndexSearcher? GetSearcher()
+    private IndexSearcher? GetSearcher()
     {
         if (_indexSearcher == null)
         {
@@ -82,18 +84,11 @@ public class SearchingEngine
         return _indexSearcher;
     }
 
-    public void Commit()
+    private void Commit()
     {
-        _indexWriter.ForceMerge(1);
+        _indexWriter!.ForceMerge(1);
         _indexWriter.Commit();
         RefreshSearcher();
-    }
-
-    public void Dispose()
-    {
-        _indexWriter.Dispose();
-        _directoryReader?.Dispose();
-        _analyzer.Dispose();
     }
 
     private void InitializeIndex()
@@ -108,8 +103,7 @@ public class SearchingEngine
         _indexWriter = new IndexWriter(directory, config);
     }
 
-
-    private void EnsureIndexDirectoryIsAccessible(string indexPath)
+    private static void EnsureIndexDirectoryIsAccessible(string indexPath)
     {
         var lockFilePath = Path.Combine(indexPath, "write.lock");
         if (File.Exists(lockFilePath))
@@ -169,6 +163,66 @@ public class SearchingEngine
         return results.OrderByDescending(x => x.Score).ToList();
     }
 
+
+    public async void StartupIndexing()
+    {
+        try
+        {
+            var startTimestamp = DateTime.Now;
+            var drivesToIndex = GetDrivesToIndex();
+            using var filesCollection = new BlockingCollection<string>();
+            using var cts = new CancellationTokenSource();
+
+            var collectingTask = Task.Run(async () =>
+            {
+                var collectingTasks = drivesToIndex.Select(rootPath =>
+                        Task.Run(() => GetAllFilesRecursiveBlocking(filesCollection, rootPath, cts.Token), cts.Token))
+                    .ToArray();
+
+                await Task.WhenAll(collectingTasks);
+                filesCollection.CompleteAdding(); 
+            }, cts.Token);
+
+            var filesCount = 0;
+            const int indexingThreads = 12;
+            var indexingTasks = Enumerable.Range(0, indexingThreads)
+                .Select(_ => Task.Run(() =>
+                {
+                    foreach (var file in filesCollection.GetConsumingEnumerable(cts.Token))
+                    {
+                        filesCount += 1;
+                        try
+                        {
+                            IndexSingleFile(file);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error indexing file {file}: {ex.Message}");
+                        }
+                    }
+                }, cts.Token)).ToArray();
+
+            await collectingTask;
+            await Task.WhenAll(indexingTasks);
+
+            await Task.Run(() =>
+            {
+                Console.WriteLine("Starting commit");
+                Commit();
+                var endTimestamp = DateTime.Now;
+                _skippedDirectories.ForEach(dir => Console.WriteLine($"Skipped directory: {dir.FullName}"));
+                Console.WriteLine($"Skipped directories count: {_skippedDirectories.Count}");
+                Console.WriteLine($"Files indexed: {filesCount}");
+                Console.WriteLine($"Indexing took {(endTimestamp - startTimestamp).TotalMinutes} minutes");
+                Console.WriteLine("Indexing complete!");
+            });
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Error while indexing");
+        }
+    }
+    
     private void GetAllFilesRecursiveBlocking(BlockingCollection<string> filesCollection, string directoryPath,
         CancellationToken cancellationToken)
     {
@@ -189,13 +243,11 @@ public class SearchingEngine
 
             try
             {
-                // Добавляем файлы в коллекцию
                 foreach (var file in Directory.EnumerateFiles(currentDirectory))
                 {
                     filesCollection.Add(file, cancellationToken);
                 }
 
-                // Добавляем поддиректории для обработки
                 foreach (var subdirectory in Directory.EnumerateDirectories(currentDirectory))
                 {
                     queue.Enqueue(subdirectory);
@@ -208,111 +260,8 @@ public class SearchingEngine
         }
     }
 
-    public async void StartupIndexing()
-    {
-        try
-        {
-            var startTimestamp = DateTime.Now;
-            var tasks = new List<Task>();
-            var drivesToIndex = GetDrivesToIndex();
-            var allFiles = new ConcurrentQueue<string>();
-            var latch = new CountdownEvent(1);
-
-
-            // BlockingCollection автоматически управляет синхронизацией
-            using var filesCollection = new BlockingCollection<string>(1000); // Ограничиваем размер буфера
-
-            using var cts = new CancellationTokenSource();
-
-            // Запускаем задачи сбора файлов
-            var collectingTask = Task.Run(async () =>
-            {
-                var collectingTasks = drivesToIndex.Select(rootPath =>
-                        Task.Run(() => GetAllFilesRecursiveBlocking(filesCollection, rootPath, cts.Token), cts.Token))
-                    .ToArray();
-
-                await Task.WhenAll(collectingTasks);
-                filesCollection.CompleteAdding(); // Сигнализируем о завершении добавления
-            });
-
-            // Запускаем задачи индексации
-            const int indexingThreads = 12;
-            var indexingTasks = Enumerable.Range(0, indexingThreads)
-                .Select(_ => Task.Run(() =>
-                {
-                    foreach (var file in filesCollection.GetConsumingEnumerable(cts.Token))
-                    {
-                        try
-                        {
-                            IndexSingleFile(file);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Error indexing file {file}: {ex.Message}");
-                        }
-                    }
-                }, cts.Token)).ToArray();
-
-            // Ждем завершения всех задач
-            await collectingTask;
-            await Task.WhenAll(indexingTasks);
-
-            // try
-            // {
-            //     tasks.AddRange(drivesToIndex.Select(rootPath => Task.Run(() => { GetAllFilesRecursive(allFiles, rootPath, latch); })));
-            //
-            //     // await Task.WhenAll(tasks);
-            //
-            //     // const int batchSize = 1000;
-            //     // var batches = allFiles
-            //     //     .Select((file, index) => new { file, index })
-            //     //     .GroupBy(x => x.index / batchSize)
-            //     //     .Select(g => g.Select(x => x.file).ToList())
-            //     //     .ToList();
-            //
-            //     
-            //     var indexTasks = new List<Task>();
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     indexTasks.Add(Task.Run(() => IndexFilesBatch(allFiles, latch)));
-            //     // for (var i = 0; i < 50; i ++) {
-            //     // }
-            //     await Task.WhenAll(indexTasks);
-            // }
-            // catch (Exception ex)
-            // {
-            //     Console.WriteLine($"Error while indexing: {ex.Message}");
-            // }
-
-            await Task.Run(() =>
-            {
-                Console.WriteLine("Starting commit");
-                Commit();
-                var endTimestamp = DateTime.Now;
-                Console.WriteLine($"Indexing took {(endTimestamp - startTimestamp).TotalMinutes} minutes");
-                Console.WriteLine("Indexing complete!");
-            });
-        }
-        catch (Exception e)
-        {
-            Log.Error(e, "Error while indexing");
-        }
-    }
-
     private List<string> GetDrivesToIndex()
     {
-        //TODO: implement logic
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             return new List<string>()
@@ -344,57 +293,6 @@ public class SearchingEngine
         return rootDirectoriesToIndex;
     }
 
-    private void GetAllFilesRecursive(ConcurrentQueue<string> filesQueue, string directoryPath,
-        CountdownEvent countdownEvent)
-    {
-        var queue = new Queue<string>();
-        queue.Enqueue(directoryPath);
-        while (queue.Count > 0)
-        {
-            var currentDirectory = queue.Dequeue();
-            var dirInfo = new DirectoryInfo(currentDirectory);
-            if (dirInfo.Attributes.HasFlag(FileAttributes.ReparsePoint) || ShouldSkipDirectory(currentDirectory) ||
-                !HasDirectoryAccess(currentDirectory))
-            {
-                continue;
-            }
-
-            var files = Directory.EnumerateFiles(currentDirectory);
-            // Task.Run(() =>
-            // {
-            // });
-
-            foreach (var file in files)
-            {
-                // var fileInfo = new FileInfo(file);
-                // if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
-                // {
-                //     continue;
-                // }
-                filesQueue.Enqueue(file);
-            }
-
-            var subdirectories = Directory.EnumerateDirectories(currentDirectory);
-            foreach (var subdirectory in subdirectories)
-            {
-                queue.Enqueue(subdirectory);
-            }
-        }
-
-        countdownEvent.Signal();
-    }
-
-    private void IndexFilesBatch(ConcurrentQueue<string> filesQueue, CountdownEvent countdownEvent)
-    {
-        while (countdownEvent.CurrentCount == 0 && filesQueue.Count != 0)
-        {
-            if (filesQueue.TryDequeue(out var file))
-            {
-                IndexSingleFile(file);
-            }
-        }
-    }
-
     private void IndexSingleFile(string file)
     {
         var fileInfo = new FileInfo(file);
@@ -410,23 +308,27 @@ public class SearchingEngine
         IndexFile(file, content);
     }
 
-    private static bool HasDirectoryAccess(string directoryPath)
+    private bool HasDirectoryAccess(string directoryPath)
     {
         try
         {
-            var canTakeDir = Directory.EnumerateFileSystemEntries(directoryPath).Take(1).ToList();
+            // Here we check directory access. If EnumerateFileSystemEntries throw an exception - we not have access to this directory
+            Directory.EnumerateFileSystemEntries(directoryPath).Take(1).ToList();
             return true;
         }
         catch (UnauthorizedAccessException)
         {
+            _skippedDirectories.Add(new DirectoryInfo(directoryPath));
             return false;
         }
         catch (DirectoryNotFoundException)
         {
+            _skippedDirectories.Add(new DirectoryInfo(directoryPath));
             return false;
         }
         catch (Exception)
         {
+            _skippedDirectories.Add(new DirectoryInfo(directoryPath));
             return false;
         }
     }
