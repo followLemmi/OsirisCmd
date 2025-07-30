@@ -13,6 +13,12 @@ public class FileSearcherPerfomanceTest
     }
 
     [Fact]
+    public void AppDataFolderTest()
+    {
+        Console.WriteLine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+    }
+
+    // [Fact]
     public void FileSystemCollectorTest()
     {
         var startTime = DateTime.Now;
@@ -36,7 +42,8 @@ public class FileSearcherPerfomanceTest
                     {
                         result.Add(file);
                     }
-                    foreach (var dir in Directory.EnumerateDirectories(currentDir)) {
+                    foreach (var dir in Directory.EnumerateDirectories(currentDir))
+                    {
                         dirs.Enqueue(dir);
                     }
 
@@ -57,7 +64,7 @@ public class FileSearcherPerfomanceTest
 
     }
 
-    [Fact]
+    // [Fact]
     public void SecondFSCollecttorTest() {
         var startTime = DateTime.Now;
         var result = GetAllFilesRecursive("C:\\");
