@@ -3,19 +3,30 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:OsirisCmd.UI.Application.FileSearcher"
-        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+        mc:Ignorable="d" Width="600" Height="450"
         x:Class="OsirisCmd.UI.Application.FileSearcher.FileSearcherWindow"
         Title="Smart Search">
 
     <Window.DataContext>
         <viewModels:FileSearcherWindowViewModel />
     </Window.DataContext>
-    
+
     <DockPanel>
-        <Grid RowDefinitions="*,*">
-            <TextBox Grid.Row="0" Watermark="Type to search..." TextChanged="TextBox_OnTextChanged" Height="25" Margin="10,25,10,5" VerticalAlignment="Top"></TextBox>
-            <ListBox Grid.Row="1" ItemsSource="{Binding SearchResults}">
-                
+        <Grid RowDefinitions="*,*,*">
+            <Grid Grid.Row="0" ColumnDefinitions="100,*" Height="200" Margin="10, 25, 10, 0" VerticalAlignment="Top">
+                <Grid Grid.Column="0" x:Name="SearchSettings">
+                    <ComboBox Grid.Column="0" ItemsSource="{Binding SearchTypeViewModels}" 
+                              SelectedItem="{Binding CurrentSearchType}"
+                              VerticalAlignment="Center">
+                    </ComboBox>
+                </Grid>
+                <ContentControl Grid.Column="1" Content="{Binding CurrentSearchType}" VerticalAlignment="Center">
+                    <ContentControl.ContentTemplate>
+                        <viewModels:SearchTemplate></viewModels:SearchTemplate>
+                    </ContentControl.ContentTemplate>
+                </ContentControl>
+            </Grid>
+            <ListBox Grid.Row="2" ItemsSource="{Binding SearchResults}">
             </ListBox>
         </Grid>
     </DockPanel>
