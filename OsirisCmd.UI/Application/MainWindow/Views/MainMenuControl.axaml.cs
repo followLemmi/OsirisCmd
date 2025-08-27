@@ -2,7 +2,7 @@
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 
-namespace OsirisCmd.UI.Application.Views;
+namespace OsirisCmd.UI.Application.MainWindow.Views;
 
 public partial class MainMenuControl : UserControl
 {

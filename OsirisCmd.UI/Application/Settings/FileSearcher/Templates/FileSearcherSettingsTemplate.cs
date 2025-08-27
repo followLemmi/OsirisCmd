@@ -10,7 +10,7 @@ using OsirisCmd.Services.Events;
 using OsirisCmd.Services.Services.FileSearcher.Settings;
 using OsirisCmd.UI.Converters;
 
-namespace OsirisCmd.UI.Settings.FileSearcher.Templates;
+namespace OsirisCmd.UI.Application.Settings.FileSearcher.Templates;
 
 public class FileSearcherSettingsTemplate : IDataTemplate
 {

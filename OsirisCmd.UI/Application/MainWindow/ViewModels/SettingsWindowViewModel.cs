@@ -1,10 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using Avalonia.Controls;
-using Microsoft.Extensions.DependencyInjection;
-using OsirisCmd.Core.Services.SettingsManager;
-using OsirisCmd.UI;
 
-namespace Application.ViewModels;
+namespace OsirisCmd.UI.Application.MainWindow.ViewModels;
 
 public class SettingsWindowViewModel
 {

@@ -2,7 +2,7 @@
 using OsirisCmd.Core.Services.SettingsManager;
 using OsirisCmd.Services.Services.FileSearcher.Settings;
 
-namespace OsirisCmd.UI.Settings.FileSearcher.ViewModels;
+namespace OsirisCmd.UI.Application.Settings.FileSearcher.ViewModels;
 
 public class FileSearcherSettingsViewModel
 {

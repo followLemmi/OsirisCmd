@@ -11,25 +11,25 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Application\" />
+      <Folder Include="Application\MainWindow\" />
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Application\Views\MainMenuControl.axaml" />
-      <AdditionalFiles Include="Application\Views\MainWindow.axaml" />
-      <AdditionalFiles Include="Application\Views\SettingsWindow.axaml" />
-      <AdditionalFiles Include="Settings\FileSearcher\FileSearcherSettingsComponent.axaml" />
+      <AdditionalFiles Include="Application\Settings\GeneralSettings\GeneralSettingsComponent.axaml" />
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="Settings\GeneralSettings\GeneralSettingsComponent.axaml.cs">
-        <DependentUpon>GeneralSettingsComponent.axaml</DependentUpon>
+      <PackageReference Include="Avalonia" Version="11.3.2" />
+      <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.2" />
+      <PackageReference Include="Avalonia.Diagnostics" Version="11.3.2" />
+      <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="App.axaml.cs">
+        <DependentUpon>App.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Avalonia" Version="11.2.6" />
     </ItemGroup>
 
 </Project>
