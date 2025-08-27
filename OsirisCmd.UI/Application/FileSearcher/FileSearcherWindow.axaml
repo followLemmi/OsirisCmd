@@ -3,53 +3,67 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:OsirisCmd.UI.Application.FileSearcher"
-        mc:Ignorable="d" Width="600" Height="450"
+        mc:Ignorable="d" Width="1000" Height="620"
         x:Class="OsirisCmd.UI.Application.FileSearcher.FileSearcherWindow"
+        WindowStartupLocation="CenterOwner"
         Title="Smart Search">
 
     <Window.DataContext>
         <viewModels:FileSearcherWindowViewModel />
     </Window.DataContext>
 
-    <DockPanel>
-        <TabControl>
-            <TabItem Name="QuickSearchTab" Header="Quick Search">
-                <Grid RowDefinitions="Auto,*">
-                    <Border Grid.Row="0" Padding="30,30,30,0">
-                        <Grid RowDefinitions="*,*,*" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0">
-                            <Border Grid.Row="0" BorderBrush="WhiteSmoke" BorderThickness="2" CornerRadius="3" Margin="0, 0, 0, 10">
-                                <Grid RowDefinitions="Auto,*,*" Margin="10" >
-                                    <TextBlock Grid.Row="0" Text="Search files" Margin="0, 0, 0, 2"></TextBlock>
-                                    <TextBox Grid.Row="1" Name="FileNameSearch" Watermark="Type file name..." Height="30">
-                                    </TextBox>
-                                    <Grid Grid.Row="2">
-                                        <CheckBox Content="Case Sensitive"></CheckBox>
+    <Border BorderBrush="WhiteSmoke" BorderThickness="1">
+        <DockPanel>
+            <TabControl>
+                <TabItem Name="QuickSearchTab" Header="Quick Search">
+                    <Grid RowDefinitions="Auto,*">
+                        <Border Grid.Row="0" Padding="30,30,30,0">
+                            <Grid RowDefinitions="*,*,*" VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                                  Margin="0">
+                                <Border Grid.Row="0" BorderBrush="WhiteSmoke" BorderThickness="2" CornerRadius="3"
+                                        Margin="0, 0, 0, 10">
+                                    <Grid RowDefinitions="Auto,*,*" Margin="10">
+                                        <TextBlock Grid.Row="0" Text="Search files" Margin="0, 0, 0, 2"></TextBlock>
+                                        <TextBox Grid.Row="1" Name="FileNameSearch" Watermark="Type file name..."
+                                                 Height="30">
+                                        </TextBox>
+                                        <Grid Grid.Row="2">
+                                            <CheckBox Content="Case Sensitive"></CheckBox>
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                            </Border>
-                            <Grid RowDefinitions="Auto,*" Grid.Row="1" Margin="0, 0, 0, 10">
-                                <TextBlock Grid.Row="0" Text="With text" Margin="0, 0, 0, 2"></TextBlock>
-                                <TextBox Grid.Row="1" Name="FileContentSearch" Watermark="Type text to search..."
-                                         Height="30">
-                                </TextBox>
+                                </Border>
+                                <Border Grid.Row="1" BorderBrush="WhiteSmoke" BorderThickness="2" CornerRadius="3"
+                                        Margin="0, 0, 0, 10">
+                                    <Grid RowDefinitions="Auto,*,*" Margin="10">
+                                        <TextBlock Grid.Row="0" Text="With text" Margin="0, 0, 0, 2"></TextBlock>
+                                        <TextBox Grid.Row="1" Name="FileContentSearch"
+                                                 Watermark="Type text to search..." Height="30">
+                                        </TextBox>
+                                        <Grid Grid.Row="2">
+                                            <CheckBox Content="Case Sensitive"></CheckBox>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                                <Button Grid.Row="2" Name="QuickSearchButton" Content="Search"
+                                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                        Width="100"
+                                        Height="50" HorizontalAlignment="Right" Margin="0, 10, 0 ,0">
+                                </Button>
                             </Grid>
-                            <Button Grid.Row="2" Name="QuickSearchButton" Content="Search"
-                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="100"
-                                    Height="50" HorizontalAlignment="Right" Margin="0, 10, 0 ,0">
-                            </Button>
-                        </Grid>
-                    </Border>
-                    <Border Grid.Row="1" Padding="30,0,30,30">
-                        <Expander Header="Search Options" HorizontalAlignment="Stretch">
-                            <Grid></Grid>
-                        </Expander>
-                    </Border>
-                </Grid>
-            </TabItem>
-            <TabItem Name="ClassicSearchTab" Header="Classic Search">
+                        </Border>
+                        <Border Grid.Row="1" Padding="30,0,30,30">
+                            <Expander Header="Search Options" HorizontalAlignment="Stretch">
+                                <Grid></Grid>
+                            </Expander>
+                        </Border>
+                    </Grid>
+                </TabItem>
+                <TabItem Name="ClassicSearchTab" Header="Classic Search">
 
-            </TabItem>
-        </TabControl>
-    </DockPanel>
+                </TabItem>
+            </TabControl>
+        </DockPanel>
+    </Border>
+
 
 </Window>
