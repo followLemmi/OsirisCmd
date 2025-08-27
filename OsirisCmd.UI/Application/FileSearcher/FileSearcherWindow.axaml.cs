@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 
 namespace OsirisCmd.UI.Application.FileSearcher;
@@ -12,11 +13,14 @@ public partial class FileSearcherWindow : Window
         InitializeComponent();
     }
 
-    private void TextBox_OnTextChanged(object? sender, TextChangedEventArgs e)
+    private void SearchButtonOnClick(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is FileSearcherWindowViewModel viewModel && sender is TextBox textBox)
+        if (DataContext is FileSearcherWindowViewModel viewModel && sender is Button button)
         {
-            viewModel.OnSearchTextChanged(textBox.Text ?? string.Empty);
+            var fileNameTextBoxContent = FileNameSearch.Text;
+            var fileContentBoxContent = FileContentSearch.Text;
+            
+            viewModel.OnSearchButtonClicked(fileNameTextBoxContent);
         }
     }
 }

@@ -152,6 +152,7 @@ public class SearchingEngine
             results.Add(new SearchResult
             {
                 FilePath = doc.Get("fullPath"),
+                CollapsedFilePath = CollapseFilePath(doc.Get("fullPath")),
                 FileName = doc.Get("fileName"),
                 Extension = doc.Get("extension"),
                 FileSize = long.Parse(doc.Get("fileSize") ?? "0"),
@@ -163,6 +164,11 @@ public class SearchingEngine
         return results.OrderByDescending(x => x.Score).ToList();
     }
 
+    private string CollapseFilePath(string filePath)
+    {
+        var splittedPath = filePath.Split(Path.DirectorySeparatorChar);
+        return ".." + Path.DirectorySeparatorChar + splittedPath[^1] + Path.DirectorySeparatorChar + splittedPath[^2] + Path.DirectorySeparatorChar + splittedPath[^3];
+    }
 
     public async void StartupIndexing()
     {

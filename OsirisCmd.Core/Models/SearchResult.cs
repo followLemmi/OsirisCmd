@@ -3,6 +3,7 @@ namespace OsirisCmd.Core.Models;
 public class SearchResult
 {
     public string FilePath { get; set; }
+    public string CollapsedFilePath { get; set; }
     public string FileName { get; set; }
     public string Extension { get; set; }
     public long FileSize { get; set; }
