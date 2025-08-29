@@ -34,7 +34,7 @@ public class FileSearcherService : IFileSearcherService
         // if (_settings != null && _settings.IsFileIndexingEnabled())
         // {
         // }
-        // _searchingEngine.StartupIndexing();
+        _searchingEngine.StartupIndexing();
     }
 
     public List<SearchResult> SearchByFileName(string fileName, int maxResults = 100)
