@@ -17,10 +17,10 @@ public class FileSearcherWindowViewModel : ViewModelBase
         _fileSearcherService = UIServiceProviderAdapter.ServiceProvider.GetRequiredService<IFileSearcherService>();
     }
 
-    public async void OnSearchButtonClicked(string fileName)
+    public async void OnSearchButtonClicked(string fileName, string content)
     {
         SearchResults.Clear();
-        var results = new ObservableCollection<SearchResult>(_fileSearcherService.SearchByFileName(fileName));
+        var results = new ObservableCollection<SearchResult>(_fileSearcherService.SmartSearch(fileName, content));
         foreach (var result in results)
         {
             SearchResults.Add(result);

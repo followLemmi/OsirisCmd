@@ -1,8 +1,6 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using OsirisCmd.Core.Models;
 
 namespace OsirisCmd.UI.Application.FileSearcher;
@@ -21,7 +19,7 @@ public partial class FileSearcherWindow : Window
             var fileNameTextBoxContent = FileNameSearch.Text;
             var fileContentBoxContent = FileContentSearch.Text;
             
-            viewModel.OnSearchButtonClicked(fileNameTextBoxContent);
+            viewModel.OnSearchButtonClicked(fileNameTextBoxContent, fileContentBoxContent);
         }
     }
 

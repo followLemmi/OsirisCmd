@@ -54,6 +54,7 @@ public class SearchingEngine
         if (!string.IsNullOrEmpty(content))
         {
             document.Add(new TextField("content", content, Field.Store.NO));
+            document.Add(new StringField("contentExact", content, Field.Store.NO));
         }
 
         document.Add(new Int64Field("fileSize", fileInfo.Length, Field.Store.YES));
