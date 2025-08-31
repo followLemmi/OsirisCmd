@@ -35,7 +35,7 @@ public class SearchingEngine
         InitializeIndex();
     }
 
-    public void IndexFile(string filePath, string content)
+    private void IndexFile(string filePath, string content)
     {
         var document = new Document();
         var fileInfo = new FileInfo(filePath);
@@ -157,6 +157,7 @@ public class SearchingEngine
                 Extension = doc.Get("extension"),
                 FileSize = long.Parse(doc.Get("fileSize") ?? "0"),
                 LastModified = new DateTime(long.Parse(doc.Get("lastModified") ?? "0")),
+                Content = doc.Get("content"),
                 Score = scoreDoc.Score
             });
         }

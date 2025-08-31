@@ -72,7 +72,7 @@
                         <TextBlock Grid.Row="0" Text="Search Results" HorizontalAlignment="Center" FontSize="16"
                                    Height="30" Margin="30, 10, 30, 10">
                         </TextBlock>
-                        <DataGrid Grid.Row="1" ItemsSource="{Binding SearchResults}" ClipToBounds="False">
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding SearchResults}" ClipToBounds="False" DoubleTapped="InputElement_OnDoubleTapped">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="File Path" CanUserResize="True" Width="*">
                                     <DataGridTemplateColumn.CellTemplate>

@@ -9,6 +9,7 @@ public class SearchResult
     public long FileSize { get; set; }
     public DateTime LastModified { get; set; }
     public float Score { get; set; }
+    public string Content { get; set; }
 
     public override string ToString()
     {
