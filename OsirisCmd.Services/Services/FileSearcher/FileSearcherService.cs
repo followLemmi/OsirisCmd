@@ -67,22 +67,6 @@ public class FileSearcherService : IFileSearcherService
         }
     }
 
-    public List<SearchResult> SearchByFileContent(string content, int maxResults = 100)
-    {
-        try
-        {
-            _logger.LogDebug($"Search by file content: {content}");
-            var query = _fileContentParser.Parse(content);
-            Console.WriteLine(query);
-            return _searchingEngine.ExecuteSearch(query, maxResults);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return [];
-        }
-    }
-
     private Query CreateQuery(string query, string field, SearchOptions searchOptions)
     {
         var userInput = query.Trim();
