@@ -1,10 +1,11 @@
 ﻿using System;
 using Avalonia;
 using System.IO;
+using Application.Core.Services.Logger;
+using Application.Services;
+using Application.UI;
 using Microsoft.Extensions.DependencyInjection;
-using OsirisCmd.Core.Services.Logger;
 using OsirisCmd.Services;
-using OsirisCmd.UI;
 
 namespace Application;
 
@@ -16,8 +17,6 @@ class Program
     public static void Main(string[] args)
     {
         MainServiceProvider.Build();
-        
-        UIServiceProviderAdapter.InjectMainServiceProvider(MainServiceProvider.ServiceProvider);
         
         _logger = MainServiceProvider.ServiceProvider.GetRequiredService<ILoggerService>();
         try
