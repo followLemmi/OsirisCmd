@@ -37,4 +37,12 @@ public partial class FileSearcherWindow : Window
             previewWindow.Show();
         }
     }
+
+    private void ExpandSearchOptionsPaneButtonHandler(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is FileSearcherWindowViewModel viewModel)
+        {
+            viewModel.IsSearchOptionsPaneOpened = !viewModel.IsSearchOptionsPaneOpened;
+        }
+    }
 }

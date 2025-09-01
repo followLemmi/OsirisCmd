@@ -2,23 +2,23 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:fileSearcher1="clr-namespace:Application.UI.FileSearcher"
+        xmlns:fileSearcher="clr-namespace:Application.UI.FileSearcher"
         mc:Ignorable="d" Width="1000" Height="720"
         x:Class="Application.UI.FileSearcher.FileSearcherWindow"
         WindowStartupLocation="CenterOwner"
         ClipToBounds="False"
         Title="Smart Search"
-        x:DataType="fileSearcher1:FileSearcherWindowViewModel">
+        x:DataType="fileSearcher:FileSearcherWindowViewModel">
 
     <Window.DataContext>
-        <fileSearcher1:FileSearcherWindowViewModel />
+        <fileSearcher:FileSearcherWindowViewModel />
     </Window.DataContext>
 
     <Border BorderBrush="WhiteSmoke" BorderThickness="1">
         <Grid RowDefinitions="Auto,*">
-            <SplitView DisplayMode="Overlay" OpenPaneLength="300" IsPaneOpen="True" >
+            <SplitView DisplayMode="CompactInline" OpenPaneLength="300" CompactPaneLength="48" IsPaneOpen="{Binding IsSearchOptionsPaneOpened}" >
                 <SplitView.Pane>
-                    <TextBlock Text="test"></TextBlock>
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Top" Click="ExpandSearchOptionsPaneButtonHandler"></Button>
                 </SplitView.Pane>
                 <TabControl Grid.Row="0">
                     <TabItem Name="QuickSearchTab" Header="Quick Search">
