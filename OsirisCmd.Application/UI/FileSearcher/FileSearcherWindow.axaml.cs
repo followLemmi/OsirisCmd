@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Application.Core.Models;
+using Application.Services.FileSearcher;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -19,8 +20,18 @@ public partial class FileSearcherWindow : Window
         {
             var fileNameTextBoxContent = FileNameSearch.Text;
             var fileContentBoxContent = FileContentSearch.Text;
+
+            // Collect Options
+            var isFileNameCaseSensitive = IsFileNameCaseSensitive.IsChecked;
+            var isFileContentCaseSensitive = IsContentCaseSensitive.IsChecked;
+
+            var searchOptions = new SearchOptions()
+            {
+                IsFileNameCaseSensitive = (bool) isFileNameCaseSensitive!,
+                IsContentCaseSensitive = (bool) isFileContentCaseSensitive!,
+            };
             
-            viewModel.OnSearchButtonClicked(fileNameTextBoxContent, fileContentBoxContent);
+            viewModel.OnSearchButtonClicked(fileNameTextBoxContent, fileContentBoxContent, searchOptions);
         }
     }
 

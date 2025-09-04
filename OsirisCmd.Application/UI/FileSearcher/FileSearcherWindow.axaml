@@ -41,7 +41,7 @@
                                                     </TextBlock>
                                                     <TextBox Grid.Column="1" Text="/this/is/test" Height="20"></TextBox>
                                                 </Grid>
-                                                <CheckBox Grid.Row="1" Content="Case Sensitive"></CheckBox>
+                                                <CheckBox Name="IsFileNameCaseSensitive" Grid.Row="1" Content="Case Sensitive"></CheckBox>
                                             </Grid>
                                         </Grid>
                                     </Border>
@@ -53,7 +53,7 @@
                                                      Watermark="Type text to search..." Height="30">
                                             </TextBox>
                                             <Grid Grid.Row="2">
-                                                <CheckBox Content="Case Sensitive"></CheckBox>
+                                                <CheckBox Name="IsContentCaseSensitive" Content="Case Sensitive"></CheckBox>
                                             </Grid>
                                         </Grid>
                                     </Border>

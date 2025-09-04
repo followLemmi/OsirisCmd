@@ -4,6 +4,7 @@ using Application.Core.Services.FileSearcher;
 using Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Avalonia.Controls;
+using Application.Services.FileSearcher;
 
 namespace Application.UI.FileSearcher;
 
@@ -28,10 +29,10 @@ public class FileSearcherWindowViewModel : ViewModelBase
         }
     }
 
-    public async void OnSearchButtonClicked(string fileName, string content)
+    public async void OnSearchButtonClicked(string fileName, string content, SearchOptions searchOptions)
     {
         SearchResults.Clear();
-        var results = new ObservableCollection<SearchResult>(_fileSearcherService.SmartSearch(fileName, content));
+        var results = new ObservableCollection<SearchResult>(_fileSearcherService.SmartSearch(fileName, content, searchOptions));
         foreach (var result in results)
         {
             SearchResults.Add(result);

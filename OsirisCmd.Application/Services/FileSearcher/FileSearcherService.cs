@@ -1,5 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Application.Core.Models;
 using Application.Core.Services.FileSearcher;
 using Application.Core.Services.Logger;
@@ -18,9 +21,6 @@ public class FileSearcherService : IFileSearcherService
     private readonly ILoggerService _logger;
 
     private readonly SearchingEngine _searchingEngine;
-    private readonly QueryParser _fileNameParser;
-    private readonly QueryParser _fileContentParser;
-    private readonly MultiFieldQueryParser _multiFieldParser;
 
     private readonly FileSearcherSettings? _settings;
 
@@ -30,10 +30,6 @@ public class FileSearcherService : IFileSearcherService
         _logger = logger;
         _settings = settingsProvider!.AttachSettings<FileSearcherSettings>();
         _searchingEngine = new SearchingEngine(_settings!);
-        var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
-        _fileNameParser = new QueryParser(LuceneVersion.LUCENE_48, "fileName", analyzer);
-        _fileContentParser = new QueryParser(LuceneVersion.LUCENE_48, "content", analyzer);
-        _multiFieldParser = new MultiFieldQueryParser(LuceneVersion.LUCENE_48, ["fileName", "content"], analyzer);
 
         // if (_settings != null && _settings.IsFileIndexingEnabled())
         // {
@@ -41,7 +37,7 @@ public class FileSearcherService : IFileSearcherService
         // _searchingEngine.StartupIndexing();
     }
 
-    public List<SearchResult> SmartSearch(string fileName, string content, int maxResults = 100)
+    public List<SearchResult> SmartSearch(string fileName, string content, SearchOptions searchOptions, int maxResults = 100)
     {
         try
         {
@@ -51,7 +47,7 @@ public class FileSearcherService : IFileSearcherService
 
             if (!string.IsNullOrWhiteSpace(fileName))
             {
-                var fileNameQuery = CreateQuery(fileName, "fileName", null); //TODO: add support of search options
+                var fileNameQuery = CreateQuery(fileName, "fileName", searchOptions);
                 boolQuery.Add(fileNameQuery, Occur.MUST);
             }
 
@@ -60,7 +56,7 @@ public class FileSearcherService : IFileSearcherService
                 var contentQuery = CreateQuery(content, "content", null); //TODO: add support of search options
                 boolQuery.Add(contentQuery, Occur.MUST);
             }
-            return _searchingEngine.ExecuteSearch(boolQuery, maxResults);
+            return _searchingEngine.ExecuteSearch(boolQuery, fileName, content, maxResults, searchOptions);
         }
         catch (Exception e)
         {
@@ -72,6 +68,10 @@ public class FileSearcherService : IFileSearcherService
     private Query CreateQuery(string query, string field, SearchOptions searchOptions)
     {
         var userInput = query.Trim();
+        if (searchOptions.IsFileNameCaseSensitive || searchOptions.IsContentCaseSensitive)
+        {
+            return new TermQuery(new Term(field, userInput.ToLower()));
+        }
         if (userInput.StartsWith($"\"") && userInput.EndsWith($"\"") && userInput.Length > 2)
         {
             userInput = userInput.Substring(1, userInput.Length - 2);
@@ -107,6 +107,7 @@ public class FileSearcherService : IFileSearcherService
         
         return new WildcardQuery(new Term(field, $"*{userInput.ToLower()}*"));
     }
+
 
 
 }

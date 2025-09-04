@@ -116,6 +116,8 @@ public class FileSearcherSettings : ISettings
 
                         ".ini", ".conf", ".properties", ".env",
 
+                        ".xml",
+
                         ".c", ".h", ".cpp", ".cc", ".cxx", ".hpp", ".hxx", ".cs", ".java", ".py",
                         ".js", ".ts", ".rb", ".go", ".rs", ".php", ".swift", ".kt", ".kts", ".dart",
                         ".m", ".mm", ".scala", ".hs", ".lua", ".pl", ".r", ".jl", ".groovy", ".clj",

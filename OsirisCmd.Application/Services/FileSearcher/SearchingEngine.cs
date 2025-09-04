@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Core.Models;
 using Application.Services.FileSearcher.Settings;
-using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
@@ -25,7 +24,7 @@ public class SearchingEngine
     private readonly FileSearcherSettings? _settings;
 
     private readonly string _indexPath;
-    private readonly StandardAnalyzer _analyzer;
+    private readonly OsirisCmdLuceneAnalyzer _analyzer;
     private IndexWriter? _indexWriter;
     private DirectoryReader? _directoryReader;
     private IndexSearcher? _indexSearcher;
@@ -37,7 +36,7 @@ public class SearchingEngine
     {
         _settings = fileSearcherSettings;
         _indexPath = _settings.GetPathToIndexes();
-        _analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
+        _analyzer = new OsirisCmdLuceneAnalyzer();
         InitializeIndex();
     }
 
@@ -60,14 +59,13 @@ public class SearchingEngine
         if (!string.IsNullOrEmpty(content))
         {
             document.Add(new TextField("content", content, Field.Store.NO));
-            document.Add(new StringField("contentExact", content, Field.Store.NO));
         }
 
         document.Add(new Int64Field("fileSize", fileInfo.Length, Field.Store.YES));
         document.Add(new Int64Field("lastModified", fileInfo.LastWriteTime.Ticks, Field.Store.YES));
 
         var term = new Term("fullPath", filePath);
-        _indexWriter.UpdateDocument(term, document);
+        _indexWriter?.UpdateDocument(term, document);
     }
 
     public bool IsIndexEmpty()
@@ -142,7 +140,7 @@ public class SearchingEngine
     }
 
 
-    public List<SearchResult> ExecuteSearch(Query query, int maxResults)
+    public List<SearchResult> ExecuteSearch(BooleanQuery query, string fileNameRequest, string contentRequest, int maxResults, SearchOptions searchOptions)
     {
         var results = new List<SearchResult>();
 
@@ -168,8 +166,38 @@ public class SearchingEngine
                 Score = scoreDoc.Score
             });
         }
+        
+        var filteredResults = new List<SearchResult>();
 
-        return results.OrderByDescending(x => x.Score).ToList();
+        if (searchOptions.IsFileNameCaseSensitive)
+        {
+            foreach (var result in results)
+            {
+                var fileInfo = new FileInfo(result.FilePath);
+                if (fileInfo.Name.Equals(fileNameRequest))
+                {
+                    filteredResults.Add(result);
+                }
+            }
+            // filteredResults.AddRange(from searchResult in results let fileInfo = new FileInfo(searchResult.FilePath) where fileInfo.Name.Equals(fileNameRequest) select searchResult);
+        }
+        
+
+        return filteredResults.OrderByDescending(x => x.Score).ToList();
+    }
+    
+    
+    private List<SearchResult> ProcessCaseSensitiveSearch(List<SearchResult> searchResults, string fieldName, string request)
+    {
+        var filteredResults = new List<SearchResult>();
+        switch (fieldName)
+        {
+            case "fileName":
+                break;
+            case "content":
+                break;
+        }
+        return filteredResults;
     }
 
     private string CollapseFilePath(string filePath)
