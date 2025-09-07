@@ -1,18 +1,12 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Application.Core.Models;
 using Application.Core.Services.FileSearcher;
 using Application.Core.Services.Logger;
 using Application.Core.Services.SettingsManager;
 using Application.Services.FileSearcher.Settings;
-using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Index;
-using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
-using Lucene.Net.Util;
 
 namespace Application.Services.FileSearcher;
 
@@ -34,7 +28,7 @@ public class FileSearcherService : IFileSearcherService
         // if (_settings != null && _settings.IsFileIndexingEnabled())
         // {
         // }
-        // _searchingEngine.StartupIndexing();
+        _searchingEngine.StartupIndexing();
     }
 
     public List<SearchResult> SmartSearch(string fileName, string content, SearchOptions searchOptions, int maxResults = 100)
@@ -47,7 +41,7 @@ public class FileSearcherService : IFileSearcherService
 
             if (!string.IsNullOrWhiteSpace(fileName))
             {
-                var fileNameQuery = CreateQuery(fileName, "fileName", searchOptions);
+                var fileNameQuery = CreateQuery(fileName, searchOptions.IsFileNameCaseSensitive ? "fileNameExact" : "fileName", searchOptions);
                 boolQuery.Add(fileNameQuery, Occur.MUST);
             }
 
@@ -68,15 +62,6 @@ public class FileSearcherService : IFileSearcherService
     private Query CreateQuery(string query, string field, SearchOptions searchOptions)
     {
         var userInput = query.Trim();
-        if (searchOptions.IsFileNameCaseSensitive || searchOptions.IsContentCaseSensitive)
-        {
-            return new TermQuery(new Term(field, userInput.ToLower()));
-        }
-        if (userInput.StartsWith($"\"") && userInput.EndsWith($"\"") && userInput.Length > 2)
-        {
-            userInput = userInput.Substring(1, userInput.Length - 2);
-            return new TermQuery(new Term(field, userInput));
-        }
 
         if (userInput.EndsWith('~'))
         {

@@ -52,13 +52,12 @@ public class SearchingEngine
 
         document.Add(new StringField("fullPath", filePath, Field.Store.YES));
         document.Add(new TextField("fileName", fileInfo.Name, Field.Store.YES));
-        document.Add(new TextField("fileNameNoExt", Path.GetFileNameWithoutExtension(filePath), Field.Store.NO));
+        document.Add(new TextField("fileNameExact", fileInfo.Name.ToLower(), Field.Store.NO));
         document.Add(new TextField("extension", fileInfo.Extension.ToLower(), Field.Store.YES));
-        document.Add(new TextField("directory", fileInfo.DirectoryName, Field.Store.NO));
 
         if (!string.IsNullOrEmpty(content))
         {
-            document.Add(new TextField("content", content, Field.Store.NO));
+            document.Add(new TextField("content", content.ToLower(), Field.Store.NO));
         }
 
         document.Add(new Int64Field("fileSize", fileInfo.Length, Field.Store.YES));
@@ -159,6 +158,7 @@ public class SearchingEngine
                 FilePath = doc.Get("fullPath"),
                 CollapsedFilePath = CollapseFilePath(doc.Get("fullPath")),
                 FileName = doc.Get("fileName"),
+                FileNameExact = doc.Get("fileNameExact"),
                 Extension = doc.Get("extension"),
                 FileSize = long.Parse(doc.Get("fileSize") ?? "0"),
                 LastModified = new DateTime(long.Parse(doc.Get("lastModified") ?? "0")),
@@ -167,25 +167,8 @@ public class SearchingEngine
             });
         }
         
-        var filteredResults = new List<SearchResult>();
-
-        if (searchOptions.IsFileNameCaseSensitive)
-        {
-            foreach (var result in results)
-            {
-                var fileInfo = new FileInfo(result.FilePath);
-                if (fileInfo.Name.Equals(fileNameRequest))
-                {
-                    filteredResults.Add(result);
-                }
-            }
-            // filteredResults.AddRange(from searchResult in results let fileInfo = new FileInfo(searchResult.FilePath) where fileInfo.Name.Equals(fileNameRequest) select searchResult);
-        }
-        
-
-        return filteredResults.OrderByDescending(x => x.Score).ToList();
+        return results.OrderByDescending(x => x.Score).ToList();
     }
-    
     
     private List<SearchResult> ProcessCaseSensitiveSearch(List<SearchResult> searchResults, string fieldName, string request)
     {

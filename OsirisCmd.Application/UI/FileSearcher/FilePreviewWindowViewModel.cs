@@ -5,7 +5,7 @@ namespace Application.UI.FileSearcher;
 public class FilePreviewWindowViewModel : ViewModelBase
 {
     private TextDocument _fileContentDocument = new();
-    
+
     public string FileName { get; set; }
     public string Extension { get; set; }
 
@@ -18,7 +18,7 @@ public class FilePreviewWindowViewModel : ViewModelBase
     public string? FileContent
     {
         get => _fileContentDocument.Text;
-        set 
+        set
         {
             if (value != null)
             {
@@ -29,11 +29,5 @@ public class FilePreviewWindowViewModel : ViewModelBase
         }
     }
 
-
-
-
-
-public FilePreviewWindowViewModel()
-{
-}
+    public FilePreviewWindowViewModel() { }
 }

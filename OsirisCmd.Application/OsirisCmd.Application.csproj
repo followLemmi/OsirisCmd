@@ -6,7 +6,7 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <AssemblyName>Application</AssemblyName>
+        <AssemblyName>OsirisCmd</AssemblyName>
         <RootNamespace>Application</RootNamespace>
     </PropertyGroup>
 

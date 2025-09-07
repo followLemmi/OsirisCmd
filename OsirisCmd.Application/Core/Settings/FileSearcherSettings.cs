@@ -164,7 +164,7 @@ public class FileSearcherSettings : ISettings
 
     private static string GetDefaultOsSpecificPathToIndexes()
     {
-        return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\OsirisCmd\\indexes\\";
+        return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/OsirisCmd/indexes/";
     }
 
     public bool IsFileIndexingEnabled()
