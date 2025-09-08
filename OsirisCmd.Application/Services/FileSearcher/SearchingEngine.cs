@@ -13,6 +13,7 @@ using Lucene.Net.Index;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
+using DotNet.Globbing;
 using Serilog;
 using Directory = System.IO.Directory;
 using Document = Lucene.Net.Documents.Document;
@@ -52,7 +53,6 @@ public class SearchingEngine
 
         document.Add(new StringField("fullPath", filePath, Field.Store.YES));
         document.Add(new TextField("fileName", fileInfo.Name, Field.Store.YES));
-        document.Add(new TextField("fileNameExact", fileInfo.Name.ToLower(), Field.Store.NO));
         document.Add(new TextField("extension", fileInfo.Extension.ToLower(), Field.Store.YES));
 
         if (!string.IsNullOrEmpty(content))
@@ -158,7 +158,6 @@ public class SearchingEngine
                 FilePath = doc.Get("fullPath"),
                 CollapsedFilePath = CollapseFilePath(doc.Get("fullPath")),
                 FileName = doc.Get("fileName"),
-                FileNameExact = doc.Get("fileNameExact"),
                 Extension = doc.Get("extension"),
                 FileSize = long.Parse(doc.Get("fileSize") ?? "0"),
                 LastModified = new DateTime(long.Parse(doc.Get("lastModified") ?? "0")),
@@ -166,8 +165,46 @@ public class SearchingEngine
                 Score = scoreDoc.Score
             });
         }
+
+        if (searchOptions.IsAnyFilterAvailable()) {
+            var filteredResults = new List<SearchResult>();
+            filteredResults.AddRange(prepareFileNameFilters(fileNameRequest, results, searchOptions));
+            return filteredResults.OrderByDescending(x => x.Score).ToList();
+        }
         
         return results.OrderByDescending(x => x.Score).ToList();
+    }
+
+    private List<SearchResult> prepareFileNameFilters(string fileNameRequest, List<SearchResult> rawResults, SearchOptions searchOptions)
+    {
+        var filteredResults = new List<SearchResult>();
+        if (searchOptions.IsFileNameCaseSensitive)
+        {
+            if (fileNameRequest.Contains('*') || fileNameRequest.Contains('?')
+                    || fileNameRequest.Contains('[') || fileNameRequest.Contains(']')
+                    || fileNameRequest.Contains('{') || fileNameRequest.Contains('}'))
+            {
+                var glob = Glob.Parse(fileNameRequest);
+                foreach (var result in rawResults)
+                {
+                    if (glob.IsMatch(result.FileName))
+                    {
+                        filteredResults.Add(result);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var result in rawResults)
+                {
+                    if (result.FileName.Equals(fileNameRequest))
+                    {
+                        filteredResults.Add(result);
+                    }
+                }
+            }
+        }
+        return filteredResults;
     }
     
     private List<SearchResult> ProcessCaseSensitiveSearch(List<SearchResult> searchResults, string fieldName, string request)

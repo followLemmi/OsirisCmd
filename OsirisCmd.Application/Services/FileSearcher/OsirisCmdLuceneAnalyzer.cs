@@ -10,6 +10,7 @@ public class OsirisCmdLuceneAnalyzer : Analyzer
     {
         var tokinizer = new WhitespaceTokenizer(Lucene.Net.Util.LuceneVersion.LUCENE_48, reader);
         TokenStream tokenStream = tokinizer;
+        tokenStream = new LowerCaseFilter(Lucene.Net.Util.LuceneVersion.LUCENE_48, tokenStream);
         return new TokenStreamComponents(tokinizer, tokenStream);
     }
 }
