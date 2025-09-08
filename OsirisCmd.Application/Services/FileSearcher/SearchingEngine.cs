@@ -156,7 +156,7 @@ public class SearchingEngine
             results.Add(new SearchResult
             {
                 FilePath = doc.Get("fullPath"),
-                CollapsedFilePath = CollapseFilePath(doc.Get("fullPath")),
+                CollapsedFilePath = doc.Get("fullPath"),
                 FileName = doc.Get("fileName"),
                 Extension = doc.Get("extension"),
                 FileSize = long.Parse(doc.Get("fileSize") ?? "0"),
@@ -166,65 +166,22 @@ public class SearchingEngine
             });
         }
 
-        if (searchOptions.IsAnyFilterAvailable()) {
-            var filteredResults = new List<SearchResult>();
-            filteredResults.AddRange(prepareFileNameFilters(fileNameRequest, results, searchOptions));
-            return filteredResults.OrderByDescending(x => x.Score).ToList();
+        if (searchOptions.IsFileNameCaseSensitive)
+        {
+            results = results.Where(r =>
+            {
+                var glob = Glob.Parse(fileNameRequest);
+                return glob.IsMatch(r.FileName);
+            }).ToList();
         }
-        
+        if (searchOptions.IsContentCaseSensitive)
+        {
+        }
+
         return results.OrderByDescending(x => x.Score).ToList();
     }
 
-    private List<SearchResult> prepareFileNameFilters(string fileNameRequest, List<SearchResult> rawResults, SearchOptions searchOptions)
-    {
-        var filteredResults = new List<SearchResult>();
-        if (searchOptions.IsFileNameCaseSensitive)
-        {
-            if (fileNameRequest.Contains('*') || fileNameRequest.Contains('?')
-                    || fileNameRequest.Contains('[') || fileNameRequest.Contains(']')
-                    || fileNameRequest.Contains('{') || fileNameRequest.Contains('}'))
-            {
-                var glob = Glob.Parse(fileNameRequest);
-                foreach (var result in rawResults)
-                {
-                    if (glob.IsMatch(result.FileName))
-                    {
-                        filteredResults.Add(result);
-                    }
-                }
-            }
-            else
-            {
-                foreach (var result in rawResults)
-                {
-                    if (result.FileName.Equals(fileNameRequest))
-                    {
-                        filteredResults.Add(result);
-                    }
-                }
-            }
-        }
-        return filteredResults;
-    }
     
-    private List<SearchResult> ProcessCaseSensitiveSearch(List<SearchResult> searchResults, string fieldName, string request)
-    {
-        var filteredResults = new List<SearchResult>();
-        switch (fieldName)
-        {
-            case "fileName":
-                break;
-            case "content":
-                break;
-        }
-        return filteredResults;
-    }
-
-    private string CollapseFilePath(string filePath)
-    {
-        var splittedPath = filePath.Split(Path.DirectorySeparatorChar);
-        return ".." + Path.DirectorySeparatorChar + splittedPath[^1] + Path.DirectorySeparatorChar + splittedPath[^2] + Path.DirectorySeparatorChar + splittedPath[^3];
-    }
 
     public async void StartupIndexing()
     {

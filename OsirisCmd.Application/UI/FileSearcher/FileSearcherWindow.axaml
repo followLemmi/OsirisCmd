@@ -87,9 +87,9 @@
                                             <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                                   Background="Transparent"
                                                   ToolTip.Tip="{Binding FilePath}" ClipToBounds="False">
-                                                <TextBlock Text="{Binding CollapsedFilePath}"
+                                                <TextBlock Text="{Binding FilePath}"
                                                            VerticalAlignment="Stretch"
-                                                           HorizontalAlignment="Stretch">
+                                                           HorizontalAlignment="Stretch" TextTrimming="LeadingCharacterEllipsis">
                                                 </TextBlock>
                                             </Grid>
                                         </DataTemplate>

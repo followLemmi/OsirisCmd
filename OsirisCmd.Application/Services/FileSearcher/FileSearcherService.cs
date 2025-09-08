@@ -28,7 +28,7 @@ public class FileSearcherService : IFileSearcherService
         // if (_settings != null && _settings.IsFileIndexingEnabled())
         // {
         // }
-        _searchingEngine.StartupIndexing();
+        // _searchingEngine.StartupIndexing();
     }
 
     public List<SearchResult> SmartSearch(string fileName, string content, SearchOptions searchOptions, int maxResults = 100)
@@ -41,7 +41,7 @@ public class FileSearcherService : IFileSearcherService
 
             if (!string.IsNullOrWhiteSpace(fileName))
             {
-                var fileNameQuery = CreateQuery(fileName, searchOptions.IsFileNameCaseSensitive ? "fileNameExact" : "fileName", searchOptions);
+                var fileNameQuery = CreateQuery(fileName, "fileName", searchOptions);
                 boolQuery.Add(fileNameQuery, Occur.MUST);
             }
 

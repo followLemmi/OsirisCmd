@@ -1,18 +1,19 @@
 using System;
+using System.Collections.Generic;
 
 namespace Application.Core.Models;
 
 public class SearchResult
 {
-    public string FilePath { get; set; }
-    public string CollapsedFilePath { get; set; }
-    public string FileName { get; set; }
-    public string FileNameExact { get; set; }
-    public string Extension { get; set; }
+    public required string FilePath { get; set; }
+    public required string CollapsedFilePath { get; set; }
+    public required string FileName { get; set; }
+    public required string Extension { get; set; }
     public long FileSize { get; set; }
     public DateTime LastModified { get; set; }
     public float Score { get; set; }
-    public string Content { get; set; }
+    public string? Content { get; set; }
+    public Dictionary<int, string> ContentEntries { get; } = new();
 
     public override string ToString()
     {
