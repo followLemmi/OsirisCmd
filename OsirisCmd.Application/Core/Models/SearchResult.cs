@@ -13,7 +13,7 @@ public class SearchResult
     public DateTime LastModified { get; set; }
     public float Score { get; set; }
     public string? Content { get; set; }
-    public Dictionary<int, string> ContentEntries { get; } = new();
+    public Dictionary<int, string> ContentEntries { get; set; } = new();
 
     public override string ToString()
     {

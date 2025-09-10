@@ -174,8 +174,14 @@ public class SearchingEngine
                 return glob.IsMatch(r.FileName);
             }).ToList();
         }
-        if (searchOptions.IsContentCaseSensitive)
+
+        if (!string.IsNullOrEmpty(contentRequest) && !string.IsNullOrWhiteSpace(contentRequest)) 
         {
+            foreach (var result in results)
+            {
+                // TODO: problem - we fill ContentEntries but if it none we need to delete this result
+                result.ContentEntries = SEContentUtils.parseResultEntries(result.FilePath, contentRequest, searchOptions.IsContentCaseSensitive);
+            }
         }
 
         return results.OrderByDescending(x => x.Score).ToList();

@@ -47,7 +47,7 @@ public class FileSearcherService : IFileSearcherService
 
             if (!string.IsNullOrWhiteSpace(content))
             {
-                var contentQuery = CreateQuery(content, "content", null); //TODO: add support of search options
+                var contentQuery = CreateQuery(content, "content", searchOptions); //TODO: add support of search options
                 boolQuery.Add(contentQuery, Occur.MUST);
             }
             return _searchingEngine.ExecuteSearch(boolQuery, fileName, content, maxResults, searchOptions);
@@ -62,6 +62,7 @@ public class FileSearcherService : IFileSearcherService
     private Query CreateQuery(string query, string field, SearchOptions searchOptions)
     {
         var userInput = query.Trim();
+        var userInputWords = userInput.Split([' '], StringSplitOptions.RemoveEmptyEntries);
 
         if (userInput.EndsWith('~'))
         {
@@ -74,20 +75,27 @@ public class FileSearcherService : IFileSearcherService
             return new FuzzyQuery(new Term(field, fuzzyInput), 1);
         }
 
-        if (userInput.Contains('*') || userInput.Contains('?'))
+        if (!(userInputWords.Length > 1) && (userInput.Contains('*') || userInput.Contains('?')))
         {
             return new WildcardQuery(new Term(field, userInput.ToLower()));
         }
 
-        if (userInput.Contains(' '))
+        if (userInputWords.Length > 1)
         {
-            var words = userInput.Split(' ');
-            var wordsQuery = new BooleanQuery();
-            foreach (var word in words)
+            var phraseQuery = new PhraseQuery();
+            foreach (var word in userInputWords)
             {
-                wordsQuery.Add(new TermQuery(new Term(field, word.ToLower())), Occur.SHOULD);
+                var wordClone = word;
+                if (wordClone.Contains('*') || wordClone.Contains('?') || wordClone.Contains('"'))
+                {
+                    wordClone = wordClone.Trim('*');
+                    wordClone = wordClone.Trim('?');
+                    wordClone = wordClone.Trim('"');
+                }
+                phraseQuery.Add(new Term(field, wordClone.ToLower()));
+                phraseQuery.Slop = 0;
             }
-            return wordsQuery;
+            return phraseQuery;
         }
         
         return new WildcardQuery(new Term(field, $"*{userInput.ToLower()}*"));
