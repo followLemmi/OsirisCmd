@@ -29,4 +29,14 @@ public class SearchingEngineTest
             _testOutputHelper.WriteLine(entry.Key + " - " + entry.Value);
         }
     }
+
+    [Fact]
+    public void LineEntriesTest() {
+        var testText = "Test text for search in line Test";
+        var result = SEContentUtils.GetLineEntriesPositions(testText, "Test", false, true);
+        Assert.Equal(result.Count, 2);
+        Assert.Equal(result[0], 0);
+        Assert.Equal(result[1], 29);
+        //TODO: continue to write this test
+    }
 }
