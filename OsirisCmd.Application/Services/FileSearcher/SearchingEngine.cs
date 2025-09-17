@@ -180,7 +180,7 @@ public class SearchingEngine
             foreach (var result in results)
             {
                 // TODO: problem - we fill ContentEntries but if it none we need to delete this result
-                result.ContentEntries = SEContentUtils.parseResultEntries(result.FilePath, contentRequest, searchOptions.IsContentCaseSensitive);
+                result.ContentEntries = SEContentUtils.ParseResultEntries(result.FilePath, contentRequest, searchOptions.IsContentCaseSensitive);
             }
         }
 

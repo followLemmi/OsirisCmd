@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Application.Services.FileSearcher;
 
 namespace Application.Core.Models;
 
@@ -13,7 +14,7 @@ public class SearchResult
     public DateTime LastModified { get; set; }
     public float Score { get; set; }
     public string? Content { get; set; }
-    public Dictionary<int, Dictionary<string, List<int>>> ContentEntries { get; set; } = new();
+    public Dictionary<int, List<LineMatchResult>> ContentEntries { get; set; } = new();
 
     public override string ToString()
     {
