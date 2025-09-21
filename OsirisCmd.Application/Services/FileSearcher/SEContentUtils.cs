@@ -101,11 +101,11 @@ public class SEContentUtils
                         if (wordIndex >= 0)
                         {
                             var matches = false;
-                            if (isPrefix && word.StartsWith(targetWord, comparisonType))
+                            if (isPrefix && word.EndsWith(targetWord, comparisonType))
                             {
                                 matches = true;
                             }
-                            else if (isSuffix && word.EndsWith(targetWord, comparisonType))
+                            else if (isSuffix && word.StartsWith(targetWord, comparisonType))
                             {
                                 matches = true;
                             }
