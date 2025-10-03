@@ -10,8 +10,7 @@ namespace Application.Services.FileSearcher;
 
 public class SEContentUtils
 {
-    public static Dictionary<int, List<LineMatchResult>> ParseResultEntries(string filePath,
-        string contentRequest, bool isCaseSensitive)
+    public static Dictionary<int, List<LineMatchResult>> ParseResultEntries(string filePath, string contentRequest, bool isCaseSensitive)
     {
         var lineNumber = 0;
         var entries = new Dictionary<int, List<LineMatchResult>>();
@@ -62,7 +61,8 @@ public class SEContentUtils
         return entries;
     }
 
-    public static List<LineMatchResult> GetLineEntriesPositions(string line, string searchingText, bool isWildcardPattern,
+    public static List<LineMatchResult> GetLineEntriesPositions(string line, string searchingText,
+        bool isWildcardPattern,
         bool caseSensitive)
     {
         var result = new List<LineMatchResult>();
@@ -153,6 +153,7 @@ public class SEContentUtils
                     {
                         break;
                     }
+
                     result.Add(new LineMatchResult
                     {
                         StartIndex = match.Index,
@@ -165,7 +166,8 @@ public class SEContentUtils
         }
         else
         {
-            var index = line.IndexOf(searchingText, caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
+            var index = line.IndexOf(searchingText,
+                caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
             while (index != -1)
             {
                 var word = line.Substring(index, searchingText.Length);

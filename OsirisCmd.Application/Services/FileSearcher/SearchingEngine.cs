@@ -166,6 +166,7 @@ public class SearchingEngine
             });
         }
 
+        // filter by file name
         if (searchOptions.IsFileNameCaseSensitive)
         {
             results = results.Where(r =>
@@ -175,12 +176,20 @@ public class SearchingEngine
             }).ToList();
         }
 
+        // filter by content
         if (!string.IsNullOrEmpty(contentRequest) && !string.IsNullOrWhiteSpace(contentRequest)) 
         {
-            foreach (var result in results)
+            foreach (var result in results.ToList())
             {
-                // TODO: problem - we fill ContentEntries but if it none we need to delete this result
-                result.ContentEntries = SEContentUtils.ParseResultEntries(result.FilePath, contentRequest, searchOptions.IsContentCaseSensitive);
+                var contentEntries = SEContentUtils.ParseResultEntries(result.FilePath, contentRequest, searchOptions.IsContentCaseSensitive);
+                if (contentEntries.Count == 0)
+                {
+                    results.Remove(result);
+                }
+                else
+                {
+                    result.ContentEntries = contentEntries;
+                }
             }
         }
 
