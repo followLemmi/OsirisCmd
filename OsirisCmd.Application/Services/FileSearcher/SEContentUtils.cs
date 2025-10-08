@@ -17,8 +17,10 @@ public class SEContentUtils
 
         var isWildcardPattern = contentRequest.Contains('*') || contentRequest.Contains('?');
         var isPhraseSearchPattern = contentRequest.StartsWith('\"') && contentRequest.EndsWith('\"');
+        var isMoreThanOneWord = contentRequest.Split([' '], StringSplitOptions.RemoveEmptyEntries).Length > 1;
         var isMultiWordPhraseSearchPattern =
-            contentRequest.Contains(' ') && !isWildcardPattern && !isPhraseSearchPattern;
+            contentRequest.Contains(' ') && isMoreThanOneWord && !isWildcardPattern && !isPhraseSearchPattern;
+        var isSingleWordSearchPattern = !isPhraseSearchPattern && !isMultiWordPhraseSearchPattern && !isWildcardPattern && !isMultiWordPhraseSearchPattern;
 
         var comparisonType = isCaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
@@ -34,6 +36,9 @@ public class SEContentUtils
             {
                 var words = contentRequest.Split([' '], StringSplitOptions.RemoveEmptyEntries);
                 matches = words.All(word => line.Contains(word, comparisonType));
+            } else if (isSingleWordSearchPattern)
+            {
+                matches = line.Contains(contentRequest, comparisonType);
             }
             else if (isWildcardPattern)
             {
@@ -51,7 +56,7 @@ public class SEContentUtils
 
             if (matches)
             {
-                var lineEntries = GetLineEntriesPositions(line, contentRequest, isWildcardPattern, isCaseSensitive);
+                var lineEntries = GetLineEntriesPositions(line, contentRequest, isWildcardPattern, isCaseSensitive, isSingleWordSearchPattern);
                 entries.Add(lineNumber, lineEntries);
             }
 
@@ -61,9 +66,7 @@ public class SEContentUtils
         return entries;
     }
 
-    public static List<LineMatchResult> GetLineEntriesPositions(string line, string searchingText,
-        bool isWildcardPattern,
-        bool caseSensitive)
+    public static List<LineMatchResult> GetLineEntriesPositions(string line, string searchingText, bool isWildcardPattern, bool caseSensitive, bool isSingleWordSearchPattern)
     {
         var result = new List<LineMatchResult>();
         if (isWildcardPattern)
@@ -166,19 +169,36 @@ public class SEContentUtils
         }
         else
         {
-            var index = line.IndexOf(searchingText,
-                caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
-            while (index != -1)
+            if (isSingleWordSearchPattern)
             {
-                var word = line.Substring(index, searchingText.Length);
-                result.Add(new LineMatchResult
+                var pattern = $@"\b{Regex.Escape(searchingText)}\b";
+                var options = caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
+                var regex = new Regex(pattern, options);
+                var matches = regex.Matches(line);
+                foreach (Match match in matches)
                 {
-                    StartIndex = index,
-                    EndIndex = index + searchingText.Length,
-                    Text = word,
-                });
-                index = line.IndexOf(searchingText, index + searchingText.Length,
-                    caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
+                    result.Add(new LineMatchResult
+                    {
+                        StartIndex = match.Index,
+                        EndIndex = match.Index + match.Length,
+                        Text = match.Value,
+                    });
+                }
+            }
+            else
+            {
+                var index = line.IndexOf(searchingText, caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
+                while (index != -1)
+                {
+                    var word = line.Substring(index, searchingText.Length);
+                    result.Add(new LineMatchResult
+                    {
+                        StartIndex = index,
+                        EndIndex = index + searchingText.Length,
+                        Text = word,
+                    });
+                    index = line.IndexOf(searchingText, index + searchingText.Length, caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
+                }    
             }
         }
 

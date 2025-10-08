@@ -15,7 +15,7 @@ public class SEContentUtils_GetLinePositions_Test
             new() {StartIndex = 0, EndIndex = searchingContent.Length, Text = "Test"},
             new() {StartIndex = 29, EndIndex = 29 + searchingContent.Length, Text = "Test"},
         };
-        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingContent, false, true);
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingContent, false, true, true);
         Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
     }
     
@@ -29,7 +29,7 @@ public class SEContentUtils_GetLinePositions_Test
             new() {StartIndex = 29, EndIndex = 29 + searchingContent.Length, Text = "Test"},
             new() {StartIndex = 34, EndIndex = 34 + searchingContent.Length, Text = "test"},
         };
-        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingContent, false, false);
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingContent, false, false, true);
         Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
     }
 
@@ -45,7 +45,7 @@ public class SEContentUtils_GetLinePositions_Test
             new() {StartIndex = 0, EndIndex = exactWord.Length, Text = "Test"},
             new() {StartIndex = 29, EndIndex = 29 + exactWord.Length, Text = "Test"},
         };
-        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, true);
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, true, false);
         Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
     }
 
@@ -65,7 +65,7 @@ public class SEContentUtils_GetLinePositions_Test
             new() {StartIndex = 29, EndIndex = 29 + exactWord.Length, Text = "Test"},
             new() {StartIndex = 34, EndIndex = 34 + exactWord.Length, Text = "test"},
         };
-        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, false);
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, false, false);
         Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
     }
 
@@ -78,7 +78,7 @@ public class SEContentUtils_GetLinePositions_Test
             new() {StartIndex = 0, EndIndex = expectedMatchLength, Text = "Test"},
             new() {StartIndex = 29, EndIndex = 29 + expectedMatchLength, Text = "Test"}
         };
-        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, true);
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, true, false);
         Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
     }
 
@@ -91,7 +91,7 @@ public class SEContentUtils_GetLinePositions_Test
             new() {StartIndex = 5, EndIndex = 5 + expectedMatchLength, Text = "text"},
             new() {StartIndex = 34, EndIndex = 34 + expectedMatchLength, Text = "test"}
         };
-        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, true);
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, true, false);
         Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
     }
 
@@ -108,7 +108,7 @@ public class SEContentUtils_GetLinePositions_Test
             new() {StartIndex = 29, EndIndex = 29 + expectedMatchLength, Text = "Test"},
             new() {StartIndex = 34, EndIndex = 34 + expectedMatchLength, Text = "test"},
         };
-        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, false);
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, false, false);
         Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
     }
 
@@ -120,7 +120,7 @@ public class SEContentUtils_GetLinePositions_Test
             new() {StartIndex = 39, EndIndex = 39 + searchingText.Length, Text = "LineSearching"},
         };
 
-        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, false, true);
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, false, true, true);
         Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
     }
     
@@ -134,12 +134,11 @@ public class SEContentUtils_GetLinePositions_Test
             new() {StartIndex = 53, EndIndex = 53 + searchingText.Length, Text = "linesearching"},
         };
 
-        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, false, false);
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, false, false, true);
         Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
     }
 
     [Theory]
-    [InlineData("Line*")]
     [InlineData("*searching")]
     public void Wildcard_CamelCase_CaseInsensitive_Test(string searchingText)
     {
@@ -149,7 +148,21 @@ public class SEContentUtils_GetLinePositions_Test
             new() {StartIndex = 53, EndIndex = 53 + expectedMatchLength, Text = "linesearching"},
         };
 
-        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, false);
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, false, false);
+        Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
+    }
+    
+    [Theory]
+    [InlineData("Test text for ")]
+    public void Wildcard_CamelCase_CaseInsensitive_Test1(string searchingText)
+    {
+        var expectedMatchLength = 13;
+        var expectedMatches = new List<LineMatchResult> {
+            new() {StartIndex = 39, EndIndex = 39 + expectedMatchLength, Text = "LineSearching"},
+            new() {StartIndex = 53, EndIndex = 53 + expectedMatchLength, Text = "linesearching"},
+        };
+
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, false, false, false);
         Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
     }
 }
