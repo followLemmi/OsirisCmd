@@ -27,36 +27,76 @@ public class SEContentUtils
         foreach (var line in File.ReadLines(filePath))
         {
             var matches = false;
+            List<LineMatchResult> lineEntries = null;
+
             if (isPhraseSearchPattern)
             {
+                // Strip quotes and search for the exact phrase anywhere in the line (including middle of strings)
                 var phrase = contentRequest.Substring(1, contentRequest.Length - 2);
                 matches = line.Contains(phrase, comparisonType);
+                if (matches)
+                {
+                    lineEntries = GetLineEntriesPositions(line, phrase, false, isCaseSensitive, false);
+                }
             }
             else if (isMultiWordPhraseSearchPattern)
             {
                 var words = contentRequest.Split([' '], StringSplitOptions.RemoveEmptyEntries);
                 matches = words.All(word => line.Contains(word, comparisonType));
-            } else if (isSingleWordSearchPattern)
+                if (matches)
+                {
+                    // Prefer contiguous phrase if present
+                    var contiguous = GetLineEntriesPositions(line, contentRequest, false, isCaseSensitive, false);
+                    if (contiguous.Count > 0)
+                    {
+                        lineEntries = contiguous;
+                    }
+                    else
+                    {
+                        // Fall back to collecting matches for each individual word
+                        var combined = new List<LineMatchResult>();
+                        foreach (var w in words)
+                        {
+                            // Treat each as a single word to respect word boundaries
+                            combined.AddRange(GetLineEntriesPositions(line, w, false, isCaseSensitive, true));
+                        }
+                        lineEntries = combined;
+                    }
+                }
+            }
+            else if (isSingleWordSearchPattern)
             {
                 matches = line.Contains(contentRequest, comparisonType);
+                if (matches)
+                {
+                    lineEntries = GetLineEntriesPositions(line, contentRequest, false, isCaseSensitive, true);
+                }
             }
             else if (isWildcardPattern)
             {
                 var globOption = new GlobOptions
                 {
-                    Evaluation = { CaseInsensitive = isCaseSensitive },
+                    Evaluation = { CaseInsensitive = !isCaseSensitive },
                 };
                 var glob = Glob.Parse(contentRequest, globOption);
                 matches = glob.IsMatch(line);
+                if (matches)
+                {
+                    lineEntries = GetLineEntriesPositions(line, contentRequest, true, isCaseSensitive, false);
+                }
             }
             else
             {
                 matches = line.Contains(contentRequest, comparisonType);
+                if (matches)
+                {
+                    lineEntries = GetLineEntriesPositions(line, contentRequest, false, isCaseSensitive, false);
+                }
             }
 
             if (matches)
             {
-                var lineEntries = GetLineEntriesPositions(line, contentRequest, isWildcardPattern, isCaseSensitive, isSingleWordSearchPattern);
+                lineEntries ??= new List<LineMatchResult>();
                 entries.Add(lineNumber, lineEntries);
             }
 
