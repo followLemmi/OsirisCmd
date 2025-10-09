@@ -123,6 +123,12 @@ public class SearchingEngine
         }
     }
 
+    private void CloseSearcher()
+    {
+        _directoryReader?.Dispose();
+        _indexSearcher = null;
+    }
+
     private void RefreshSearcher()
     {
         _directoryReader?.Dispose();
@@ -192,14 +198,18 @@ public class SearchingEngine
                 }
             }
         }
-
+        CloseSearcher();
         return results.OrderByDescending(x => x.Score).ToList();
     }
 
     
 
-    public async void StartupIndexing()
+    public async void FirstStartIndexing()
     {
+        if (Directory.Exists(_indexPath))
+        {
+            Directory.Delete(_indexPath, true);
+        }
         try
         {
             var startTimestamp = DateTime.Now;

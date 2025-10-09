@@ -151,15 +151,43 @@ public class SEContentUtils_GetLinePositions_Test
         var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, false, false);
         Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
     }
-    
+
     [Theory]
-    [InlineData("Test text for ")]
-    public void Wildcard_CamelCase_CaseInsensitive_Test1(string searchingText)
+    [InlineData("*searching")]
+    public void Wildcard_CamelCase_CaseSensitive_Test(string searchingText)
     {
-        var expectedMatchLength = 13;
-        var expectedMatches = new List<LineMatchResult> {
-            new() {StartIndex = 39, EndIndex = 39 + expectedMatchLength, Text = "LineSearching"},
-            new() {StartIndex = 53, EndIndex = 53 + expectedMatchLength, Text = "linesearching"},
+        var expectedMatches = new List<LineMatchResult>
+        {
+            new() {StartIndex = 53, EndIndex = 53 + "linesearching".Length, Text = "linesearching"},
+        };
+
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, true, true, false);
+        Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
+    }
+
+    [Theory]
+    [InlineData("search")]
+    public void Substring_CaseSensitive_Test(string searchingText)
+    {
+        var expectedMatches = new List<LineMatchResult>
+        {
+            new() {StartIndex = 14, EndIndex = 14 + searchingText.Length, Text = "search"},
+            new() {StartIndex = 57, EndIndex = 57 + searchingText.Length, Text = "search"},
+        };
+
+        var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, false, true, false);
+        Assert.Equal(expectedMatches, result, LineMatchResult.StartIndexEndIndexTextComparer);
+    }
+
+    [Theory]
+    [InlineData("Search")]
+    public void Substring_CaseInsensitive_Test(string searchingText)
+    {
+        var expectedMatches = new List<LineMatchResult>
+        {
+            new() {StartIndex = 14, EndIndex = 14 + searchingText.Length, Text = "search"},
+            new() {StartIndex = 43, EndIndex = 43 + searchingText.Length, Text = "Search"},
+            new() {StartIndex = 57, EndIndex = 57 + searchingText.Length, Text = "search"},
         };
 
         var result = SEContentUtils.GetLineEntriesPositions(Content, searchingText, false, false, false);
