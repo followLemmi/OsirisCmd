@@ -1,40 +1,74 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <AssemblyName>Application</AssemblyName>
-    <RootNamespace>Application</RootNamespace>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <AssemblyName>OsirisCmd</AssemblyName>
+        <RootNamespace>Application</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.3.2" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.2" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.2" />
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-preview.6.25358.103" />
-    
-    <PackageReference Include="Serilog" Version="4.3.1-dev-02373" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.1-dev-02317" />
-    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.3.4" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.4" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.4" />
+        <PackageReference Include="DotNet.Glob" Version="3.1.3" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-preview.6.25358.103" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\OsirisCmd.Services\OsirisCmd.Services.csproj" />
-    <ProjectReference Include="..\OsirisCmd.UI\OsirisCmd.UI.csproj" />
-  </ItemGroup>
+        <PackageReference Include="Serilog" Version="4.3.1-dev-02373" />
+        <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.1-dev-02317" />
+        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 
-<!--  <ItemGroup>-->
-<!--    <UpToDateCheckInput Remove="Views\MainMenuControl.axaml" />-->
-<!--    <UpToDateCheckInput Remove="Views\MainWindow.axaml" />-->
-<!--    <UpToDateCheckInput Remove="Views\SettingsWindow.axaml" />-->
-<!--    <UpToDateCheckInput Remove="Components\GeneralSettingsComponent.axaml" />-->
-<!--  </ItemGroup>-->
 
-  <Target Name="CreatePluginsFolder" AfterTargets="AfterBuild">
-    <MakeDir Directories="$(OutputPath)plugins" />
-  </Target>
+        <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.3.0" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.4" />
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.3.4" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.4" />
+        <PackageReference Include="AvaloniaEdit.TextMate" Version="11.3.0" />
+
+
+        <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00017" />
+        <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00017" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Localization\Localization.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>Localization.resx</DependentUpon>
+        </Compile>
+        <Compile Update="App.axaml.cs">
+          <DependentUpon>App.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Localization\Localization.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Localization.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Core\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="UI\FileSearcher\FilePreviewWindow.axaml" />
+      <AdditionalFiles Include="UI\FileSearcher\FileSearcherWindow.axaml" />
+      <AdditionalFiles Include="UI\MainWindow\Views\MainMenuControl.axaml" />
+      <AdditionalFiles Include="UI\MainWindow\Views\MainWindow.axaml" />
+      <AdditionalFiles Include="UI\MainWindow\Views\SettingsWindow.axaml" />
+      <AdditionalFiles Include="UI\Settings\FileSearcher\FileSearcherSettingsComponent.axaml" />
+      <AdditionalFiles Include="UI\Settings\GeneralSettings\GeneralSettingsComponent.axaml" />
+    </ItemGroup>
+
+    <Target Name="CreatePluginsFolder" AfterTargets="AfterBuild">
+        <MakeDir Directories="$(OutputPath)plugins" />
+    </Target>
 </Project>
