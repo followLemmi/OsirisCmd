@@ -72,7 +72,37 @@ public class FileSearcherSettings : ISettings
                             Value = new List<string>()
                             {
                                 "\\$Recycle.Bin",
-                                "\\ProgrammData",
+                                "\\ProgramData",
+                                "\\System Volume Information",
+                                "\\$Recycle.Bin",
+                                "\\Recovery",
+                                "\\Config.Msi",
+                                "\\Documents and Settings",
+                                "\\MSOCache",
+                                "\\Windows",
+                                
+                                "cache",
+                                "Temp",
+                                "Cache",
+                                
+                                "\\Windows\\Temp",
+                                "\\Windows\\SoftwareDistribution",
+                                "\\Windows\\WinSxS",
+                                "\\Windows\\assembly",
+                                "\\Windows\\Microsoft.NET\\Framework",
+                                "\\Windows\\Microsoft.NET\\Framework64",
+                                
+                                "\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Cache",
+                                "\\AppData\\Local\\Mozilla\\Firefox\\Profiles",
+                                "\\AppData\\Local\\Microsoft\\Edge\\User Data\\Default\\Cache",
+                                "\\AppData\\Local\\Temp",
+                                "\\AppData\\Local\\Microsoft\\Windows\\History",
+                                "\\AppData\\Local\\Microsoft\\Windows\\Temporary Internet Files",
+                                "\\AppData\\Local\\Microsoft\\Windows\\INetCache",
+                                "\\AppData\\Local\\Microsoft\\Windows\\WebCache",
+                                "\\AppData\\Local\\CrashDumps",
+                                "\\AppData\\LocalLow\\Temp",
+                                "\\AppData\\Roaming\\Microsoft\\Windows\\Recent",
                             }
                         },
                         new()

@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Core.Models;
 using Application.Services.FileSearcher.Settings;
+using Application.Services.Utils;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
@@ -90,7 +91,7 @@ public class SearchingEngine
 
     private void Commit()
     {
-        _indexWriter!.ForceMerge(1);
+        _indexWriter!.ForceMerge(5);
         _indexWriter.Commit();
         RefreshSearcher();
     }
@@ -202,13 +203,98 @@ public class SearchingEngine
         return results.OrderByDescending(x => x.Score).ToList();
     }
 
-    
+    public async void RegularStartIndexing()
+    {
+        try
+        {
+            var startTimestamp = DateTime.Now;
+            var drivesToIndex = GetDrivesToIndex();
+            using var filesCollection = new BlockingCollection<string>();
+            using var cts = new CancellationTokenSource();
+
+            var collectingTask = Task.Run(async () =>
+            {
+                var collectingTasks = drivesToIndex.Select(rootPath =>
+                        Task.Run(() => GetAllFilesRecursiveBlocking(filesCollection, rootPath, cts.Token), cts.Token))
+                    .ToArray();
+
+                await Task.WhenAll(collectingTasks);
+                filesCollection.CompleteAdding(); 
+            }, cts.Token);
+
+            var filesCount = 0;
+            const int indexingThreads = 12;
+            var indexingTasks = Enumerable.Range(0, indexingThreads)
+                .Select(_ => Task.Run(() =>
+                {
+                    foreach (var file in filesCollection.GetConsumingEnumerable(cts.Token))
+                    {
+                        if (CheckIsFileAlreadyIndexed(file))
+                        {
+                            continue;
+                        }
+                        filesCount += 1;
+                        try
+                        {
+                            IndexSingleFile(file);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error indexing file {file}: {ex.Message}");
+                        }
+                    }
+                }, cts.Token)).ToArray();
+
+            await collectingTask;
+            await Task.WhenAll(indexingTasks);
+
+            await Task.Run(() =>
+            {
+                Console.WriteLine("Starting commit");
+                Commit();
+                var endTimestamp = DateTime.Now;
+                _skippedDirectories.ForEach(dir => Console.WriteLine($"Skipped directory: {dir.FullName}"));
+                Console.WriteLine($"Skipped directories count: {_skippedDirectories.Count}");
+                Console.WriteLine($"Files indexed: {filesCount}");
+                Console.WriteLine($"Indexing took {(endTimestamp - startTimestamp).TotalMinutes} minutes");
+                Console.WriteLine("Indexing complete!");
+            });
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Error while indexing");
+        }
+    }
+
+    private bool CheckIsFileAlreadyIndexed(string filePath)
+    {
+        var fileInfo = new FileInfo(filePath);
+        var boolQuery = new BooleanQuery();
+        var exactPathQuery = new TermQuery(new Term("fullPath", filePath));
+        boolQuery.Add(exactPathQuery, Occur.MUST);
+        var searcher = GetSearcher();
+        if (searcher == null)
+        {
+            return false;
+        }
+        var topDocs = searcher.Search(boolQuery, 1);
+        if (topDocs.ScoreDocs.Length != 1)
+        {
+            return false;
+        }
+        var doc = searcher.Doc(topDocs.ScoreDocs[0].Doc);
+        var lastModified = new DateTime(long.Parse(doc.Get("lastModified") ?? "0"));
+        return lastModified.Equals(fileInfo.LastWriteTime);
+    } 
 
     public async void FirstStartIndexing()
     {
-        if (Directory.Exists(_indexPath))
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            Directory.Delete(_indexPath, true);
+            if (Directory.Exists(_indexPath))
+            {
+                Directory.Delete(_indexPath, true);
+            }
         }
         try
         {

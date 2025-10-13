@@ -5,6 +5,7 @@ using Application.Core.Services.FileSearcher;
 using Application.Core.Services.Logger;
 using Application.Core.Services.SettingsManager;
 using Application.Services.FileSearcher.Settings;
+using Application.Services.Utils;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
 
@@ -28,7 +29,8 @@ public class FileSearcherService : IFileSearcherService
         // if (_settings != null && _settings.IsFileIndexingEnabled())
         // {
         // }
-        // _searchingEngine.StartupIndexing();
+        // _searchingEngine.FirstStartIndexing();
+        _searchingEngine.RegularStartIndexing();
     }
 
     public List<SearchResult> SmartSearch(string fileName, string content, SearchOptions searchOptions, int maxResults = 100)
@@ -41,13 +43,13 @@ public class FileSearcherService : IFileSearcherService
 
             if (!string.IsNullOrWhiteSpace(fileName))
             {
-                var fileNameQuery = CreateQuery(fileName, "fileName", searchOptions);
+                var fileNameQuery = FileSearcherUtils.CreateQuery(fileName, "fileName");
                 boolQuery.Add(fileNameQuery, Occur.MUST);
             }
 
             if (!string.IsNullOrWhiteSpace(content))
             {
-                var contentQuery = CreateQuery(content, "content", searchOptions); //TODO: add support of search options
+                var contentQuery = FileSearcherUtils.CreateQuery(content, "content");
                 boolQuery.Add(contentQuery, Occur.MUST);
             }
             return _searchingEngine.ExecuteSearch(boolQuery, fileName, content, maxResults, searchOptions);
@@ -59,47 +61,7 @@ public class FileSearcherService : IFileSearcherService
         }
     }
 
-    private Query CreateQuery(string query, string field, SearchOptions searchOptions)
-    {
-        var userInput = query.Trim();
-        var userInputWords = userInput.Split([' '], StringSplitOptions.RemoveEmptyEntries);
-
-        if (userInput.EndsWith('~'))
-        {
-            var fuzzyInput = userInput.Substring(0, userInput.Length - 1);
-            var parts = fuzzyInput.Split('~');
-            if (parts.Length == 2 && int.TryParse(parts[1], out var editDistance))
-            {
-                return new FuzzyQuery(new Term(field, parts[0]), editDistance);
-            }
-            return new FuzzyQuery(new Term(field, fuzzyInput), 1);
-        }
-
-        if (!(userInputWords.Length > 1) && (userInput.Contains('*') || userInput.Contains('?')))
-        {
-            return new WildcardQuery(new Term(field, userInput.ToLower()));
-        }
-
-        if (userInputWords.Length > 1)
-        {
-            var phraseQuery = new PhraseQuery();
-            foreach (var word in userInputWords)
-            {
-                var wordClone = word;
-                if (wordClone.Contains('*') || wordClone.Contains('?') || wordClone.Contains('"'))
-                {
-                    wordClone = wordClone.Trim('*');
-                    wordClone = wordClone.Trim('?');
-                    wordClone = wordClone.Trim('"');
-                }
-                phraseQuery.Add(new Term(field, wordClone.ToLower()));
-                phraseQuery.Slop = 0;
-            }
-            return phraseQuery;
-        }
-        
-        return new WildcardQuery(new Term(field, $"*{userInput.ToLower()}*"));
-    }
+    
 
 
 
