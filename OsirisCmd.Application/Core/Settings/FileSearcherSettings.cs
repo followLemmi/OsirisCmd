@@ -63,7 +63,10 @@ public class FileSearcherSettings : ISettings
                                 "/var/opt",
                                 "/var/lib",
                                 "/var/spool",
-                                "/var/cache"
+                                "/var/cache",
+                                "temp",
+                                "tmp",
+                                "cache"
                             }
                         },
                         new()

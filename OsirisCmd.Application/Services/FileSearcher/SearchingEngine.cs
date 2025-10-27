@@ -285,71 +285,124 @@ public class SearchingEngine
         var doc = searcher.Doc(topDocs.ScoreDocs[0].Doc);
         var lastModified = new DateTime(long.Parse(doc.Get("lastModified") ?? "0"));
         return lastModified.Equals(fileInfo.LastWriteTime);
-    } 
+    }
 
-    public async void FirstStartIndexing()
+    public async void CleanIndexes(object? state)
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            if (Directory.Exists(_indexPath))
-            {
-                Directory.Delete(_indexPath, true);
-            }
-        }
         try
         {
-            var startTimestamp = DateTime.Now;
-            var drivesToIndex = GetDrivesToIndex();
-            using var filesCollection = new BlockingCollection<string>();
-            using var cts = new CancellationTokenSource();
-
-            var collectingTask = Task.Run(async () =>
-            {
-                var collectingTasks = drivesToIndex.Select(rootPath =>
-                        Task.Run(() => GetAllFilesRecursiveBlocking(filesCollection, rootPath, cts.Token), cts.Token))
-                    .ToArray();
-
-                await Task.WhenAll(collectingTasks);
-                filesCollection.CompleteAdding(); 
-            }, cts.Token);
-
-            var filesCount = 0;
-            const int indexingThreads = 12;
-            var indexingTasks = Enumerable.Range(0, indexingThreads)
-                .Select(_ => Task.Run(() =>
-                {
-                    foreach (var file in filesCollection.GetConsumingEnumerable(cts.Token))
-                    {
-                        filesCount += 1;
-                        try
-                        {
-                            IndexSingleFile(file);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Error indexing file {file}: {ex.Message}");
-                        }
-                    }
-                }, cts.Token)).ToArray();
-
-            await collectingTask;
-            await Task.WhenAll(indexingTasks);
-
             await Task.Run(() =>
             {
-                Console.WriteLine("Starting commit");
+                var searcher = GetSearcher();
+                var documentsToDelete = new List<Term>();
+                var leaves = searcher.IndexReader.Leaves;
+                foreach (var context in leaves)
+                {
+                    var reader = context.Reader;
+                    var liveDocs = context.AtomicReader.LiveDocs;
+                    for (int i = 0; i < reader.MaxDoc; i++)
+                    {
+                        if (liveDocs != null && !liveDocs.Get(i))
+                        {
+                            continue;
+                        }
+                        var doc = reader.Document(i);
+                        var filePath = doc.Get("fullPath");
+                        var fileInfo = new FileInfo(filePath);
+                        if (!fileInfo.Exists)
+                        {
+                            documentsToDelete.Add(new Term("fullPath", filePath));
+                        }
+                    }
+                }
+
+                foreach (var term in documentsToDelete)
+                {
+                    _indexWriter?.DeleteDocuments(term);
+                    Console.WriteLine($"Deleted doc from index {term.Text}");
+                }
                 Commit();
-                var endTimestamp = DateTime.Now;
-                _skippedDirectories.ForEach(dir => Console.WriteLine($"Skipped directory: {dir.FullName}"));
-                Console.WriteLine($"Skipped directories count: {_skippedDirectories.Count}");
-                Console.WriteLine($"Files indexed: {filesCount}");
-                Console.WriteLine($"Indexing took {(endTimestamp - startTimestamp).TotalMinutes} minutes");
-                Console.WriteLine("Indexing complete!");
+                Console.WriteLine($"Deleted docs from indexes {documentsToDelete.Count}");
+                CloseSearcher();
+                return Task.CompletedTask;
             });
         }
         catch (Exception e)
         {
-            Log.Error(e, "Error while indexing");
+            Console.WriteLine($"Exception during CLEAN INDEXES {e}");
+        }
+    }
+
+    public async void FirstStartIndexing()
+    {
+        try
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                if (Directory.Exists(_indexPath))
+                {
+                    Directory.Delete(_indexPath, true);
+                }
+            }
+            try
+            {
+                var startTimestamp = DateTime.Now;
+                var drivesToIndex = GetDrivesToIndex();
+                using var filesCollection = new BlockingCollection<string>();
+                using var cts = new CancellationTokenSource();
+
+                var collectingTask = Task.Run(async () =>
+                {
+                    var collectingTasks = drivesToIndex.Select(rootPath =>
+                            Task.Run(() => GetAllFilesRecursiveBlocking(filesCollection, rootPath, cts.Token), cts.Token))
+                        .ToArray();
+
+                    await Task.WhenAll(collectingTasks);
+                    filesCollection.CompleteAdding(); 
+                }, cts.Token);
+
+                var filesCount = 0;
+                const int indexingThreads = 12;
+                var indexingTasks = Enumerable.Range(0, indexingThreads)
+                    .Select(_ => Task.Run(() =>
+                    {
+                        foreach (var file in filesCollection.GetConsumingEnumerable(cts.Token))
+                        {
+                            filesCount += 1;
+                            try
+                            {
+                                IndexSingleFile(file);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error indexing file {file}: {ex.Message}");
+                            }
+                        }
+                    }, cts.Token)).ToArray();
+
+                await collectingTask;
+                await Task.WhenAll(indexingTasks);
+
+                await Task.Run(() =>
+                {
+                    Console.WriteLine("Starting commit");
+                    Commit();
+                    var endTimestamp = DateTime.Now;
+                    _skippedDirectories.ForEach(dir => Console.WriteLine($"Skipped directory: {dir.FullName}"));
+                    Console.WriteLine($"Skipped directories count: {_skippedDirectories.Count}");
+                    Console.WriteLine($"Files indexed: {filesCount}");
+                    Console.WriteLine($"Indexing took {(endTimestamp - startTimestamp).TotalMinutes} minutes");
+                    Console.WriteLine("Indexing complete!");
+                });
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Error while indexing");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception during FIRST START INDEXING {e}");
         }
     }
     

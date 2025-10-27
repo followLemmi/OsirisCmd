@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Application.Core.Models;
 using Application.Core.Services.FileSearcher;
 using Application.Core.Services.Logger;
@@ -18,6 +19,8 @@ public class FileSearcherService : IFileSearcherService
     private readonly SearchingEngine _searchingEngine;
 
     private readonly FileSearcherSettings? _settings;
+    
+    private readonly Timer? _cleanIndexesTimer;
 
     public FileSearcherService(ILoggerService logger, ISettingsProviderService settingsProvider)
     {
@@ -30,7 +33,14 @@ public class FileSearcherService : IFileSearcherService
         // {
         // }
         // _searchingEngine.FirstStartIndexing();
-        _searchingEngine.RegularStartIndexing();
+        // _searchingEngine.RegularStartIndexing();
+        
+        _cleanIndexesTimer = new Timer(_searchingEngine.CleanIndexes, null, TimeSpan.Zero, TimeSpan.FromSeconds(60));
+    }
+
+    private void StopCleanIndexesTimer()
+    {
+        _cleanIndexesTimer?.Dispose();
     }
 
     public List<SearchResult> SmartSearch(string fileName, string content, SearchOptions searchOptions, int maxResults = 100)
